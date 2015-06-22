@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 import time
+import pyqtgraph as pg
 
 from PyQt4 import QtGui, QtCore
 # Since posix symlinks are not supported on windows, let's
@@ -71,8 +72,18 @@ if __name__ == '__main__':
     ui = ecg.gui.Ui_MainWindow()
     ui.setupUi(MainWindow)
     ui.actionExit.triggered.connect(app.quit)
+    ui.actionExit.setShortcut('Ctrl+X')
     ui.actionLoad.triggered.connect(fileLoadSequence)
-    MainWindow.show()
+    ui.actionLoad.setShortcut('Ctrl+O')
+    ecgplot = ui.graphicsView.getPlotItem()
+    # show both x and y grids
+    ecgplot.showGrid(x=True, y=True, alpha=0.6)
+    # enable the zoom box thing
+    vb = ecgplot.getViewBox()
+    vb.setMouseMode(pg.ViewBox.RectMode)
+
+    MainWindow.showMaximized()
+    pg.setConfigOption('leftButtonPan', False)
     sys.exit(app.exec_())
 
     
