@@ -5,6 +5,7 @@ import os
 import sys
 import time
 
+from PyQt4 import QtGui, QtCore
 # Since posix symlinks are not supported on windows, let's
 # explicitly update sys.path.
 try:
@@ -20,6 +21,24 @@ class ECGViewerParser(argparse.ArgumentParser):
         self.print_help()
         sys.exit(2)
 
+
+app = None
+MainWindow = None
+ui = None
+#---------------------------------------------------------------------------
+def fileLoadSequence():
+    f = showDialog()
+    r = ecg.SpikeReader.reader(str(f.name))
+    ecgplot = ui.graphicsView.getPlotItem()
+    ecg_signal = r.GetECGSignal()
+    ecgplot.plot(ecg_signal, pen=(255,255,255,200))
+
+#---------------------------------------------------------------------------
+def showDialog():
+        fname = QtGui.QFileDialog.getOpenFileName()
+        f = open(fname, 'r')
+        return f
+
 #---------------------------------------------------------------------------
 if __name__ == '__main__':
 
@@ -33,7 +52,7 @@ if __name__ == '__main__':
         help="increases log verbosity for each occurence.")
 
     # parser.add_argument("-i", "--inputFile", dest="filename",
-    #     required=True, type=argparse.FileType('r'))
+    #      required=False, type=argparse.FileType('r'))
 
     parser.add_argument("-i", "--inputFile", dest="filename",
         required=False, type=argparse.FileType('r'))
@@ -51,5 +70,9 @@ if __name__ == '__main__':
     MainWindow = ecg.gui.QtGui.QMainWindow()
     ui = ecg.gui.Ui_MainWindow()
     ui.setupUi(MainWindow)
+    ui.actionExit.triggered.connect(app.quit)
+    ui.actionLoad.triggered.connect(fileLoadSequence)
     MainWindow.show()
     sys.exit(app.exec_())
+
+    

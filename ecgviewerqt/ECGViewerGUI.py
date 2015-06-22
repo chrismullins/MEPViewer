@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ECGViewerGUI.ui'
+# Form implementation generated from reading ui file 'D:\P\MEPApp\Qt\ECGViewerGUI.ui'
 #
-# Created: Fri Jun 19 10:27:02 2015
+# Created: Sun Jun 21 19:23:26 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,44 +26,17 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1338, 896)
+        MainWindow.resize(344, 283)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
-        self.verticalLayoutWidget = QtGui.QWidget(self.centralwidget)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(40, 60, 281, 711))
-        self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
-        self.verticalLayout.setMargin(0)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.label = QtGui.QLabel(self.verticalLayoutWidget)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.horizontalLayout.addWidget(self.label)
-        self.horizontalSlider = QtGui.QSlider(self.verticalLayoutWidget)
-        self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
-        self.horizontalSlider.setObjectName(_fromUtf8("horizontalSlider"))
-        self.horizontalLayout.addWidget(self.horizontalSlider)
-        self.doubleSpinBox = QtGui.QDoubleSpinBox(self.verticalLayoutWidget)
-        self.doubleSpinBox.setObjectName(_fromUtf8("doubleSpinBox"))
-        self.horizontalLayout.addWidget(self.doubleSpinBox)
-        self.verticalLayout.addLayout(self.horizontalLayout)
-        self.comboBox = QtGui.QComboBox(self.verticalLayoutWidget)
-        self.comboBox.setObjectName(_fromUtf8("comboBox"))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.verticalLayout.addWidget(self.comboBox)
-        self.commandLinkButton = QtGui.QCommandLinkButton(self.verticalLayoutWidget)
-        self.commandLinkButton.setObjectName(_fromUtf8("commandLinkButton"))
-        self.verticalLayout.addWidget(self.commandLinkButton)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout.addItem(spacerItem)
-        self.graphicsView = QtGui.QGraphicsView(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(320, 60, 711, 711))
+        self.gridLayout = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.graphicsView = PlotWidget(self.centralwidget)
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
+        self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1338, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 344, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -91,16 +64,13 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
-        self.label.setText(_translate("MainWindow", "Trigger Detection: ", None))
-        self.comboBox.setItemText(0, _translate("MainWindow", "Paired Pulse Data", None))
-        self.comboBox.setItemText(1, _translate("MainWindow", "CSP Data", None))
-        self.commandLinkButton.setText(_translate("MainWindow", "Run", None))
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.menuSave.setTitle(_translate("MainWindow", "Save", None))
         self.actionLoad.setText(_translate("MainWindow", "Load", None))
         self.actionCSV.setText(_translate("MainWindow", "CSV", None))
         self.actionExit.setText(_translate("MainWindow", "Exit", None))
 
+from pyqtgraph import PlotWidget
 
 if __name__ == "__main__":
     import sys
