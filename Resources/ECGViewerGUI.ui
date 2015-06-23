@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>344</width>
-    <height>283</height>
+    <width>1062</width>
+    <height>897</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>344</width>
+     <width>1062</width>
      <height>21</height>
     </rect>
    </property>
@@ -44,7 +44,15 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuActions">
+    <property name="title">
+     <string>Actions</string>
+    </property>
+    <addaction name="actionAnnotate_Min_Max"/>
+    <addaction name="actionClear_Scene"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuActions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionLoad">
@@ -60,6 +68,16 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionAnnotate_Min_Max">
+   <property name="text">
+    <string>Annotate Min/Max</string>
+   </property>
+  </action>
+  <action name="actionClear_Scene">
+   <property name="text">
+    <string>Clear Scene</string>
    </property>
   </action>
  </widget>

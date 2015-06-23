@@ -22,8 +22,8 @@ class ECGLogic(object):
         self.response_window_indices = self.response_window_time*emg_signal.sampling_rate
         self.index_tstep_dict = dict(enumerate(self.timesteps))
         self.index_signal_dict = dict(enumerate(self.emg_signal))
-        self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
-        print self.emg_signal_deriv
+        #self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
+        self.emg_signal_deriv = None
         self.trigger_indices = []
         self.trigger_index_minmax_dict = dict()
         self.trigger_time_minmax_dict = dict()
@@ -31,6 +31,7 @@ class ECGLogic(object):
     def reportTriggersAndResponses(self):
         """Return a dict of [trigger_coord: [min_coord,max_coord]]
         """
+        self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
         self.findTriggers()
         for trigger_index in self.trigger_indices:
             self.trigger_time_minmax_dict[ \

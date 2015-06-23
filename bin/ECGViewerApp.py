@@ -54,7 +54,7 @@ def fileLoadSequence():
     global signal_logic
     signal_logic = ecg.ECGLogic.ECGLogic(ecg_signal)
     ecgplot.plot(signal_logic.timesteps, ecg_signal, pen=(255,255,255,200))
-    annotateSignal()
+    #annotateSignal()
 
 #---------------------------------------------------------------------------
 def showDialog():
@@ -97,6 +97,8 @@ if __name__ == '__main__':
     ui.actionExit.setShortcut('Ctrl+X')
     ui.actionLoad.triggered.connect(fileLoadSequence)
     ui.actionLoad.setShortcut('Ctrl+O')
+    ui.actionAnnotate_Min_Max.triggered.connect(annotateSignal)
+    ui.actionAnnotate_Min_Max.setShortcut('Ctrl+A')
     #global ecgplot
     ecgplot = ui.graphicsView.getPlotItem()
     # show both x and y grids
