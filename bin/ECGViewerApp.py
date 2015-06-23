@@ -26,13 +26,54 @@ class ECGViewerParser(argparse.ArgumentParser):
 app = None
 MainWindow = None
 ui = None
+signal_logic = None
+ecgplot = None
+
+#---------------------------------------------------------------------------
+def annotateSignal():
+    #trigger_indices, trigger_coords = signal_logic.findTriggers()
+    # text = pg.TextItem(html='<div style="text-align: center"><span style="color: #FFF;">This is the</span><br><span style="color: #FF0; font-size: 16pt;">PEAK</span></div>', anchor=(-0.3,1.3), border='w', fill=(0, 0, 255, 100))
+    # ecgplot.addItem(text)
+    # text.setPos(0, 5)
+    #a1 = pg.ArrowItem(angle=-160, tipAngle=60, headLen=40, tailLen=40, tailWidth=20, pen={'color': 'w', 'width': 3})
+    # a2 = pg.ArrowItem(angle=-120, tipAngle=30, baseAngle=20, headLen=40, tailLen=40, tailWidth=8, pen=None, brush='y')
+    # Use a3 style for min and max?
+    # a3 = pg.ArrowItem(angle=-60, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+    a4 = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
+    # a2.setPos(10,0)
+    # a3.setPos(20,0)
+    a4.setPos(10,0)
+    ecgplot.addItem(a4)
+    # p.addItem(a2)
+    # p.addItem(a3)
+    # p.addItem(a4)
+    # p.setRange(QtCore.QRectF(-20, -10, 60, 20))
+    global signal_logic
+    #global ecgplot
+    signal_trigger_minmax_dict = signal_logic.reportTriggersAndResponses()
+    for trigger, minmaxlist in signal_trigger_minmax_dict.items():
+        triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
+        triggerItem.setPos(trigger,0)
+        ecgplot.addItem(triggerItem)
+        minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
+        ecgplot.addItem(minItem)
+        maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
+        ecgplot.addItem(maxItem)
+
+
 #---------------------------------------------------------------------------
 def fileLoadSequence():
     f = showDialog()
     r = ecg.SpikeReader.reader(str(f.name))
     ecgplot = ui.graphicsView.getPlotItem()
     ecg_signal = r.GetECGSignal()
-    ecgplot.plot(ecg_signal, pen=(255,255,255,200))
+    #ecgplot.plot(ecg_signal, pen=(255,255,255,200))
+    global signal_logic
+    signal_logic = ecg.ECGLogic.ECGLogic(ecg_signal)
+    ecgplot.plot(signal_logic.timesteps, ecg_signal, pen=(255,255,255,200))
+    annotateSignal()
 
 #---------------------------------------------------------------------------
 def showDialog():
@@ -75,6 +116,7 @@ if __name__ == '__main__':
     ui.actionExit.setShortcut('Ctrl+X')
     ui.actionLoad.triggered.connect(fileLoadSequence)
     ui.actionLoad.setShortcut('Ctrl+O')
+    #global ecgplot
     ecgplot = ui.graphicsView.getPlotItem()
     # show both x and y grids
     ecgplot.showGrid(x=True, y=True, alpha=0.6)

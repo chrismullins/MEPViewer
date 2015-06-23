@@ -7,3 +7,4 @@ from .__version__ import __version__, __version_info__
 import ECGViewerGUI as gui
 import reader as SpikeReader
 import utils as utils
+import logic as ECGLogic
