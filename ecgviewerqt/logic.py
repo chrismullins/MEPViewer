@@ -5,24 +5,18 @@ import itertools as it
 class ECGLogic(object):
 
     def createTimeStepsArray(self, signal):
-        timesteps = np.array([float(signal.sampling_period)*i \
-            for i in xrange(signal.size)])
-        return timesteps
+        dt = float(signal.sampling_period)
+        return np.linspace(0.0, float(dt*signal.size - dt), num=signal.size)
 
     def createSignalDeriv(self, signal):
-        deriv = np.diff(signal)
-        while deriv.size < signal.size:
-            deriv = np.append(deriv, [[0]])
-        return deriv
+        #deriv = np.diff(signal)
+        return np.diff(signal)
 
     def __init__(self, emg_signal, window_begin=0.02, window_end=0.10):
         self.emg_signal = emg_signal
         self.timesteps = self.createTimeStepsArray(emg_signal)
         self.response_window_time = np.array([window_begin,window_end])
         self.response_window_indices = self.response_window_time*emg_signal.sampling_rate
-        self.index_tstep_dict = dict(enumerate(self.timesteps))
-        self.index_signal_dict = dict(enumerate(self.emg_signal))
-        #self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
         self.emg_signal_deriv = None
         self.trigger_indices = []
         self.trigger_index_minmax_dict = dict()
@@ -33,7 +27,7 @@ class ECGLogic(object):
         """
         self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
         self.findTriggers()
-        for trigger_index in self.trigger_indices:
+        for trigger_index in self.trigger_indices[0]:
             self.trigger_time_minmax_dict[ \
               self.timesteps[trigger_index]] = self.findResponseMinMaxs(trigger_index)
         return self.trigger_time_minmax_dict
@@ -43,13 +37,10 @@ class ECGLogic(object):
         # Skip ahead the corresponding number of samples to avoid tagging both triggers. Non-pp data
         # doesn't have close-together triggers so we can do this safely for both.
         trigger_waiting_period = int(0.030*self.emg_signal.sampling_rate)
-        i=0
-        while i < len(self.emg_signal_deriv):
-            if self.emg_signal_deriv[i] > 1.0:
-                self.trigger_indices.append(i)
-                i += trigger_waiting_period
-            else:
-                i += 1
+        # TODO: put in the PP hack again 
+        trigger_mask = np.ma.masked_less(self.emg_signal_deriv, 1.0)
+        print np.ma.nonzero(trigger_mask)
+        self.trigger_indices = np.array(np.ma.nonzero(trigger_mask))
         return
 
 
