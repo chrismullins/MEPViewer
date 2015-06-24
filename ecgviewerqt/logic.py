@@ -9,7 +9,6 @@ class ECGLogic(object):
         return np.linspace(0.0, float(dt*signal.size - dt), num=signal.size)
 
     def createSignalDeriv(self, signal):
-        #deriv = np.diff(signal)
         return np.diff(signal)
 
     def __init__(self, emg_signal, window_begin=0.02, window_end=0.10):
@@ -21,6 +20,9 @@ class ECGLogic(object):
         self.trigger_indices = []
         self.trigger_index_minmax_dict = dict()
         self.trigger_time_minmax_dict = dict()
+        self.trigger_timepoints = []
+        self.trigger_mins = []
+        self.trigger_maxs = []
 
     def reportTriggersAndResponses(self):
         """Return a dict of [trigger_coord: [min_coord,max_coord]]
@@ -28,6 +30,7 @@ class ECGLogic(object):
         self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
         self.findTriggers()
         for trigger_index in self.trigger_indices[0]:
+            self.trigger_timepoints.append(self.timesteps[trigger_index])
             self.trigger_time_minmax_dict[ \
               self.timesteps[trigger_index]] = self.findResponseMinMaxs(trigger_index)
         return self.trigger_time_minmax_dict
@@ -39,7 +42,6 @@ class ECGLogic(object):
         trigger_waiting_period = int(0.030*self.emg_signal.sampling_rate)
         # TODO: put in the PP hack again 
         trigger_mask = np.ma.masked_less(self.emg_signal_deriv, 1.0)
-        print np.ma.nonzero(trigger_mask)
         self.trigger_indices = np.array(np.ma.nonzero(trigger_mask))
         return
 
@@ -54,9 +56,27 @@ class ECGLogic(object):
         min_index = np.argmin(window)
         window_max = window[max_index]
         window_min = window[min_index]
+        # Store these values now
+        self.trigger_mins.append(window_min)
+        self.trigger_maxs.append(window_max)
         final_min_index = window_start_index+min_index
         final_max_index = window_start_index+max_index
         return [ \
           np.array([self.timesteps[final_min_index],self.emg_signal[final_min_index]]), \
           np.array([self.timesteps[final_max_index],self.emg_signal[final_max_index]]) \
           ]
+
+    def getTriggerTimePoints(self):
+        return np.array(self.trigger_timepoints)
+
+    def getTriggerMins(self):
+        return np.array(self.trigger_mins)
+
+    def getTriggerMaxs(self):
+        return np.array(self.trigger_maxs)
+
+    def getTriggerMeans(self):
+        return (np.array(self.trigger_mins) + np.array(self.trigger_maxs)) / 2
+
+    def getTriggerP2Ps(self):
+        return abs(np.array(self.trigger_mins) + abs(np.array(self.trigger_maxs)))
