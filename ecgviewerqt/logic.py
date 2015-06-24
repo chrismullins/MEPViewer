@@ -39,7 +39,6 @@ class ECGLogic(object):
         trigger_waiting_period = int(0.030*self.emg_signal.sampling_rate)
         # TODO: put in the PP hack again 
         trigger_mask = np.ma.masked_less(self.emg_signal_deriv, 1.0)
-        print np.ma.nonzero(trigger_mask)
         self.trigger_indices = np.array(np.ma.nonzero(trigger_mask))
         return
 
