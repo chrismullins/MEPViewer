@@ -34,6 +34,8 @@ class MEPAppController(object):
         self.ecg_signal = None
         self.ecgplot = None
         self.currentFile = None
+        self.annotated = False
+
         self.startApp()
 
     def clearScene(self):
@@ -41,19 +43,25 @@ class MEPAppController(object):
         self.signal_logic = None
         self.ecg_signal = None
         self.currentFile = None
+        self.annotated = False
 
     def annotateSignal(self):
-        signal_trigger_minmax_dict = self.signal_logic.reportTriggersAndResponses()
-        for trigger, minmaxlist in signal_trigger_minmax_dict.items():
-            triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
-            triggerItem.setPos(trigger,0)
-            self.ecgplot.addItem(triggerItem)
-            minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-            minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
-            self.ecgplot.addItem(minItem)
-            maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-            maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
-            self.ecgplot.addItem(maxItem)
+        if not self.annotated:
+            signal_trigger_minmax_dict = self.signal_logic.reportTriggersAndResponses()
+            for trigger, minmaxlist in signal_trigger_minmax_dict.items():
+                triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
+                triggerItem.setPos(trigger,0)
+                self.ecgplot.addItem(triggerItem)
+                minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+                minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
+                self.ecgplot.addItem(minItem)
+                maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+                maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
+                self.ecgplot.addItem(maxItem)
+            self.annotated = True
+        else:
+            print("Already annotated! Load a new file.")
+        return
 
     def fileLoadSequence(self):
         self.currentFile = self.showDialog()
@@ -62,6 +70,7 @@ class MEPAppController(object):
         self.ecg_signal = r.GetECGSignal()
         self.signal_logic = ecg.ECGLogic.ECGLogic(self.ecg_signal)
         self.ecgplot.plot(self.signal_logic.timesteps, self.ecg_signal, pen=(255,255,255,200))
+        return
 
     def showDialog(self):
             fname = QtGui.QFileDialog.getOpenFileName()
@@ -73,18 +82,22 @@ class MEPAppController(object):
                 directory=os.path.dirname(str(self.currentFile.name)), \
                 caption="Save Response as CSV"
                 )
-            if outputPath:
-                np.savetxt(str(outputPath), \
-                    np.vstack([
-                    np.hstack(arr.reshape(-1,1) for arr in \
-                        [self.signal_logic.getTriggerTimePoints(), \
-                         self.signal_logic.getTriggerMins(), \
-                         self.signal_logic.getTriggerMaxs(), \
-                         self.signal_logic.getTriggerMeans(), \
-                         self.signal_logic.getTriggerP2Ps()]), \
-                        np.array([0,0,0,0,self.signal_logic.getFinalAverage()])]), \
-                    header="trigger,min,max,mean,peak2peak,finalAverage", delimiter=",", \
-                    fmt="%.5e")
+            if self.annotated:
+                if outputPath:
+                    np.savetxt(str(outputPath), \
+                        np.vstack([
+                        np.hstack(arr.reshape(-1,1) for arr in \
+                            [self.signal_logic.getTriggerTimePoints(), \
+                             self.signal_logic.getTriggerMins(), \
+                             self.signal_logic.getTriggerMaxs(), \
+                             self.signal_logic.getTriggerMeans(), \
+                             self.signal_logic.getTriggerP2Ps()]), \
+                            np.array([0,0,0,0,self.signal_logic.getFinalAverage()])]), \
+                        header="trigger,min,max,mean,peak2peak,finalAverage", delimiter=",", \
+                        fmt="%.5e")
+            else:
+                print("Annotate first, then save it out!")
+            return
 
     def startApp(self):
         self.app = ecg.gui.QtGui.QApplication(sys.argv)
