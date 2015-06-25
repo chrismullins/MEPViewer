@@ -80,3 +80,6 @@ class ECGLogic(object):
 
     def getTriggerP2Ps(self):
         return abs(np.array(self.trigger_mins) + abs(np.array(self.trigger_maxs)))
+
+    def getFinalAverage(self):
+        return np.mean(self.getTriggerP2Ps())
