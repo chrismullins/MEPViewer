@@ -70,13 +70,15 @@ class MEPAppController(object):
                 )
             if outputPath:
                 np.savetxt(str(outputPath), \
+                    np.vstack([
                     np.hstack(arr.reshape(-1,1) for arr in \
                         [self.signal_logic.getTriggerTimePoints(), \
                          self.signal_logic.getTriggerMins(), \
                          self.signal_logic.getTriggerMaxs(), \
                          self.signal_logic.getTriggerMeans(), \
                          self.signal_logic.getTriggerP2Ps()]), \
-                    header="trigger,min,max,mean,peak2peak", delimiter=",", \
+                        np.array([0,0,0,0,self.signal_logic.getFinalAverage()])]), \
+                    header="trigger,min,max,mean,peak2peak,finalAverage", delimiter=",", \
                     fmt="%.5e")
 
     def startApp(self):
