@@ -23,7 +23,6 @@ class ECGViewerParser(argparse.ArgumentParser):
         self.print_help()
         sys.exit(2)
 
-
 #---------------------------------------------------------------------------
 class MEPAppController(object):
 
@@ -36,6 +35,12 @@ class MEPAppController(object):
         self.ecgplot = None
         self.currentFile = None
         self.startApp()
+
+    def clearScene(self):
+        self.ecgplot.clear()
+        self.signal_logic = None
+        self.ecg_signal = None
+        self.currentFile = None
 
     def annotateSignal(self):
         signal_trigger_minmax_dict = self.signal_logic.reportTriggersAndResponses()
@@ -93,7 +98,9 @@ class MEPAppController(object):
         self.ui.actionAnnotate_Min_Max.triggered.connect(self.annotateSignal)
         self.ui.actionAnnotate_Min_Max.setShortcut('Ctrl+A')
         self.ui.actionCSV.triggered.connect(self.writeToCSV)
-        self.ui.actionCSV.setShortcut('Ctrl+W')
+        self.ui.actionCSV.setShortcut('Ctrl+S')
+        self.ui.actionClear_Scene.triggered.connect(self.clearScene)
+        self.ui.actionClear_Scene.setShortcut('Ctrl+W')
         self.ecgplot = self.ui.graphicsView.getPlotItem()
         self.ecgplot.showGrid(x=True, y=True, alpha=0.6)
         vb = self.ecgplot.getViewBox()
@@ -113,9 +120,6 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--verbose", dest="verbose_count",
         action="count", default=0,
         help="increases log verbosity for each occurence.")
-
-    # parser.add_argument("-i", "--inputFile", dest="filename",
-    #      required=False, type=argparse.FileType('r'))
 
     parser.add_argument("-i", "--inputFile", dest="filename",
         required=False, type=argparse.FileType('r'))
