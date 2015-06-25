@@ -11,13 +11,13 @@ from PyQt4 import QtGui, QtCore
 # Since posix symlinks are not supported on windows, let's
 # explicitly update sys.path.
 try:
-    import ecgviewerqt as ecg
+    import emgviewerqt as emg
 except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
-    import ecgviewerqt as ecg
+    import emgviewerqt as emg
 
 #---------------------------------------------------------------------------
-class ECGViewerParser(argparse.ArgumentParser):
+class EMGViewerParser(argparse.ArgumentParser):
     def error(self, message):
         sys.stderr.write('error: %s\n' % message)
         self.print_help()
@@ -31,17 +31,17 @@ class MEPAppController(object):
         self.MainWindow = None
         self.ui = None
         self.signal_logic = None
-        self.ecg_signal = None
-        self.ecgplot = None
+        self.emg_signal = None
+        self.emgplot = None
         self.currentFile = None
         self.annotated = False
 
         self.startApp()
 
     def clearScene(self):
-        self.ecgplot.clear()
+        self.emgplot.clear()
         self.signal_logic = None
-        self.ecg_signal = None
+        self.emg_signal = None
         self.currentFile = None
         self.annotated = False
 
@@ -51,13 +51,13 @@ class MEPAppController(object):
             for trigger, minmaxlist in signal_trigger_minmax_dict.items():
                 triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
                 triggerItem.setPos(trigger,0)
-                self.ecgplot.addItem(triggerItem)
+                self.emgplot.addItem(triggerItem)
                 minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
                 minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
-                self.ecgplot.addItem(minItem)
+                self.emgplot.addItem(minItem)
                 maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
                 maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
-                self.ecgplot.addItem(maxItem)
+                self.emgplot.addItem(maxItem)
             self.annotated = True
         else:
             print("Already annotated! Load a new file.")
@@ -65,11 +65,11 @@ class MEPAppController(object):
 
     def fileLoadSequence(self):
         self.currentFile = self.showDialog()
-        r = ecg.SpikeReader.reader(str(self.currentFile.name))
-        self.ecgplot = self.ui.graphicsView.getPlotItem()
-        self.ecg_signal = r.GetECGSignal()
-        self.signal_logic = ecg.ECGLogic.ECGLogic(self.ecg_signal)
-        self.ecgplot.plot(self.signal_logic.timesteps, self.ecg_signal, pen=(255,255,255,200))
+        r = emg.SpikeReader.reader(str(self.currentFile.name))
+        self.emgplot = self.ui.graphicsView.getPlotItem()
+        self.emg_signal = r.GetEMGSignal()
+        self.signal_logic = emg.EMGLogic.EMGLogic(self.emg_signal)
+        self.emgplot.plot(self.signal_logic.timesteps, self.emg_signal, pen=(255,255,255,200))
         return
 
     def showDialog(self):
@@ -100,9 +100,9 @@ class MEPAppController(object):
             return
 
     def startApp(self):
-        self.app = ecg.gui.QtGui.QApplication(sys.argv)
-        self.MainWindow = ecg.gui.QtGui.QMainWindow()
-        self.ui = ecg.gui.Ui_MainWindow()
+        self.app = emg.gui.QtGui.QApplication(sys.argv)
+        self.MainWindow = emg.gui.QtGui.QMainWindow()
+        self.ui = emg.gui.Ui_MainWindow()
         self.ui.setupUi(self.MainWindow)
         self.ui.actionExit.triggered.connect(self.app.quit)
         self.ui.actionExit.setShortcut('Ctrl+X')
@@ -114,9 +114,9 @@ class MEPAppController(object):
         self.ui.actionCSV.setShortcut('Ctrl+S')
         self.ui.actionClear_Scene.triggered.connect(self.clearScene)
         self.ui.actionClear_Scene.setShortcut('Ctrl+W')
-        self.ecgplot = self.ui.graphicsView.getPlotItem()
-        self.ecgplot.showGrid(x=True, y=True, alpha=0.6)
-        vb = self.ecgplot.getViewBox()
+        self.emgplot = self.ui.graphicsView.getPlotItem()
+        self.emgplot.showGrid(x=True, y=True, alpha=0.6)
+        vb = self.emgplot.getViewBox()
         vb.setMouseMode(pg.ViewBox.RectMode)
         self.MainWindow.showMaximized()
         pg.setConfigOption('leftButtonPan', False)
@@ -125,10 +125,10 @@ class MEPAppController(object):
 #---------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    parser = ECGViewerParser()
+    parser = EMGViewerParser()
 
     parser.add_argument("--version", action="version",
-        version="%(prog)s {}".format(ecg.__version__))
+        version="%(prog)s {}".format(emg.__version__))
 
     parser.add_argument("-v", "--verbose", dest="verbose_count",
         action="count", default=0,
