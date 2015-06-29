@@ -51,12 +51,11 @@ pip install C:\Users\chris\Downloads\numpy‑1.9.2+mkl‑cp27‑none‑win_amd64
   * Run `sudo pip install numpy` in your terminal.
 * [neo](https://pythonhosted.org/neo/) for reading electrophysiology data in Python
   * Run `sudo pip install neo` in your terminal.
+* [Qt 4.8.x Libraries](http://www.qt.io/)
+  * Download the installer (`qt-opensource-mac-4.8.6-1.dmg`) from the [Qt 4.8.6 archive page](https://download.qt.io/archive/qt/4.8/4.8.6/)
+* PyQt4
+  * [Download the source](http://www.riverbankcomputing.com/software/pyqt/download), compile and install it
 
-[ImportError: cannot import name _thread](http://stackoverflow.com/questions/27630114/matplotlib-issue-on-os-x-importerror-cannot-import-name-thread) -- Sometimes the matplotlib install fails on newer versions of OSX. The fix mentioned in the link is:
-```bash
-sudo pip uninstall python-dateutil
-sudo pip install python-dateutil==2.2
-```
 
 ### Download the MEPViewer
 If you have [git](https://git-scm.com/) available in your command line or terminal, execute:
