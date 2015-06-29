@@ -56,7 +56,9 @@ pip install C:\Users\chris\Downloads\numpy‑1.9.2+mkl‑cp27‑none‑win_amd64
 * PyQt4
   * [Download the source](http://www.riverbankcomputing.com/software/pyqt/download), compile and install it
   * This is more complicated on Macs, I wrote some instructions [here](https://github.com/chrismullins/MEPViewer/blob/documentation/Resources/PyQt4-MacOSX.md)
-
+* PyQtGraph
+  * Run `sudo pip install pyqtgraph` in your terminal.
+  * If this doesn't work, follow the instructions on the [PyQtGraph homepage](http://www.pyqtgraph.org/)
 
 ### Download the MEPViewer
 If you have [git](https://git-scm.com/) available in your command line or terminal, execute:
