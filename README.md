@@ -55,6 +55,7 @@ pip install C:\Users\chris\Downloads\numpy‑1.9.2+mkl‑cp27‑none‑win_amd64
   * Download the installer (`qt-opensource-mac-4.8.6-1.dmg`) from the [Qt 4.8.6 archive page](https://download.qt.io/archive/qt/4.8/4.8.6/)
 * PyQt4
   * [Download the source](http://www.riverbankcomputing.com/software/pyqt/download), compile and install it
+  * This is more complicated on Macs, I wrote some instructions [here](https://github.com/chrismullins/MEPViewer/blob/documentation/Resources/PyQt4-MacOSX.md)
 
 
 ### Download the MEPViewer
