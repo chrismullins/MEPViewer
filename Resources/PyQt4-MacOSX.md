@@ -1,6 +1,6 @@
 # Installing PyQt4 on Mac OS X.
 There's no prebuilt installer for pyqt4 on this platform, so we need to compile it ourselves.
-If you've never compiled anything before feel free to ask Chris -- he's writing this as an instructional for himself before he forgets.  He thinks writing in 3rd person is weird.
+If you've never compiled anything before feel free to ask Chris -- he's writing this as an instructional for himself before he forgets.  He thinks writing in 3rd person is weird.  Most of these instructions are taken from [this page](http://www.noktec.be/python/how-to-install-pyqt4-on-osx).
 
 ## [Homebrew](http://brew.sh/)
 If you use homebrew, this should be easy. Just execute the following commands in a terminal:
