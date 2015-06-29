@@ -66,3 +66,20 @@ If you have [git](https://git-scm.com/) available in your command line or termin
 git clone git://github.com/chrismullins/MEPViewer.git
 ```
 or simply download and extract the tarball from this page.
+
+### Usage
+Once you have downloaded the repository, run it in a terminal:
+```bash
+python bin/MEPViewerApp.py
+```
+This should open up the main windows.  From here you should be able to interact with the software through this window.
+#### Keyboard shortcuts
+`Ctrl+X`: Exit the application
+
+`Ctrl+O`: Open a data file
+
+`Ctrl+A`: Annotate the signal
+
+`Ctrl+S`: Save info to CSV
+
+`Ctrl+W`: Clear the window to load another data file
