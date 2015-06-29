@@ -83,3 +83,11 @@ This should open up the main windows.  From here you should be able to interact 
 `Ctrl+S`: Save info to CSV
 
 `Ctrl+W`: Clear the window to load another data file
+
+The main window, after loading a data file, should look something like this:
+![alt tag](https://raw.githubusercontent.com/chrismullins/MEPViewer/8d9d93a1e8283e4db83c23571db64445f1104163/Resources/MEPApp-mainwindow.png)
+
+Use the scroll wheel inside the plot to zoom in or out, and on the axes to scale the axes.  Clicking and dragging inside the plot allows you to zoom in on any part of the plot:
+![alt tag](https://raw.githubusercontent.com/chrismullins/MEPViewer/8d9d93a1e8283e4db83c23571db64445f1104163/Resources/MEPApp-drag.png)
+Use the `Ctrl+A` shortcut to annotate the triggers along with their max and min responses, or navigate through the top-level menu.
+![alt tag](https://raw.githubusercontent.com/chrismullins/MEPViewer/8d9d93a1e8283e4db83c23571db64445f1104163/Resources/MEPApp-annotations.png)
