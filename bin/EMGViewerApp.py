@@ -49,22 +49,47 @@ class MEPAppController(object):
         self.currentFile = None
         self.annotated = False
 
-    def annotateSignal(self):
+    # def annotateSignal(self):
+    #     if not self.annotated:
+    #         signal_trigger_minmax_dict = self.signal_logic.reportTriggersAndResponses()
+    #         for trigger, minmaxlist in signal_trigger_minmax_dict.items():
+    #             triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
+    #             triggerItem.setPos(trigger,0)
+    #             self.emgplot.addItem(triggerItem)
+    #             minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+    #             minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
+    #             self.emgplot.addItem(minItem)
+    #             maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+    #             maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
+    #             self.emgplot.addItem(maxItem)
+    #         self.annotated = True
+    #     else:
+    #         print("Already annotated! Load a new file.")
+    #     return
+    def autoAnnotateSignal(self):
         if not self.annotated:
-            signal_trigger_minmax_dict = self.signal_logic.reportTriggersAndResponses()
-            for trigger, minmaxlist in signal_trigger_minmax_dict.items():
-                triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
-                triggerItem.setPos(trigger,0)
-                self.emgplot.addItem(triggerItem)
-                minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-                minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
-                self.emgplot.addItem(minItem)
-                maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-                maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
-                self.emgplot.addItem(maxItem)
+            for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
+                self.annotateTriggerPoint(trigger_time)
+                self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
+                self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
             self.annotated = True
-        else:
-            print("Already annotated! Load a new file.")
+
+    def annotateTriggerPoint(self, trigger_time):
+        triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
+        triggerItem.setPos(trigger_time,0)
+        self.emgplot.addItem(triggerItem)
+        return
+
+    def annotateMinPoint(self, min_time, min_value):
+        minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        minItem.setPos(min_time, min_value)
+        self.emgplot.addItem(minItem)
+        return
+
+    def annotateMaxPoint(self, max_time, max_value):
+        maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        maxItem.setPos(max_time, max_value)
+        self.emgplot.addItem(maxItem)
         return
 
     def fileLoadSequence(self):
@@ -90,23 +115,18 @@ class MEPAppController(object):
         view = self.emgplot.getViewBox()
         self.emgplot.removeItem(self.vLine)
         self.emgplot.removeItem(self.hLine)
-        trigger_time, response_minmax = self.signal_logic.addTriggerTimepoint( \
+        trigger_time = self.signal_logic.addTriggerTimepoint( \
             float(view.mapSceneToView(ev.pos()).x()))
-        self.annotateMinMax(trigger_time, response_minmax)
+        minmaxtuple = self.signal_logic.trigger_dict[trigger_time]
+        print minmaxtuple
+        #self.annotateMinMax(trigger_time, response_minmax)
+        self.annotateTriggerPoint(trigger_time)
+        self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
+        self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
+
         self.MainWindow.mousePressEvent = self.originalMousePressEvent
         self.emgplot.scene().sigMouseMoved.disconnect()
         return
-
-    def annotateMinMax(self, trigger_time, minmaxlist):
-        triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
-        triggerItem.setPos(trigger_time,0)
-        self.emgplot.addItem(triggerItem)
-        minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-        minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
-        self.emgplot.addItem(minItem)
-        maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-        maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
-        self.emgplot.addItem(maxItem)
 
     def mouseMovedAddTrigger(self, evt):
         #pos = evt[0]  ## using signal proxy turns original arguments into a tuple
@@ -156,7 +176,7 @@ class MEPAppController(object):
         self.ui.actionExit.setShortcut('Ctrl+X')
         self.ui.actionLoad.triggered.connect(self.fileLoadSequence)
         self.ui.actionLoad.setShortcut('Ctrl+O')
-        self.ui.actionAnnotate_Min_Max.triggered.connect(self.annotateSignal)
+        self.ui.actionAnnotate_Min_Max.triggered.connect(self.autoAnnotateSignal)
         self.ui.actionAnnotate_Min_Max.setShortcut('Ctrl+A')
         self.ui.actionCSV.triggered.connect(self.writeToCSV)
         self.ui.actionCSV.setShortcut('Ctrl+S')
