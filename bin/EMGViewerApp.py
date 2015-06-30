@@ -35,7 +35,11 @@ class MEPAppController(object):
         self.emgplot = None
         self.currentFile = None
         self.annotated = False
-
+        self.plotDataItem = None
+        self.view = None
+        self.vLine = None
+        self.hLine = None
+        self.originalMousePressEvent = None
         self.startApp()
 
     def clearScene(self):
@@ -69,8 +73,51 @@ class MEPAppController(object):
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emg_signal = r.GetEMGSignal()
         self.signal_logic = emg.EMGLogic.EMGLogic(self.emg_signal)
-        self.emgplot.plot(self.signal_logic.timesteps, self.emg_signal, pen=(255,255,255,200))
+        self.plotDataItem = self.emgplot.plot(self.signal_logic.timesteps, self.emg_signal, pen=(255,255,255,200))
+        # self.plotDataItem.sigClicked.connect(self.clicked)
+        # self.plotDataItem.sigClicked.emit(self)
         return
+
+    def addTrigger(self,ev):
+        self.vLine = pg.InfiniteLine(angle=90, movable=False)
+        self.hLine = pg.InfiniteLine(angle=0, movable=False)
+        self.emgplot.addItem(self.vLine, ignoreBounds=True)
+        self.emgplot.addItem(self.hLine, ignoreBounds=True)
+        self.MainWindow.mousePressEvent = self.plotClicked
+        self.emgplot.scene().sigMouseMoved.connect(self.mouseMovedAddTrigger)
+
+    def plotClicked(self,ev):
+        view = self.emgplot.getViewBox()
+        self.emgplot.removeItem(self.vLine)
+        self.emgplot.removeItem(self.hLine)
+        trigger_time, response_minmax = self.signal_logic.addTriggerTimepoint( \
+            float(view.mapSceneToView(ev.pos()).x()))
+        self.annotateMinMax(trigger_time, response_minmax)
+        self.MainWindow.mousePressEvent = self.originalMousePressEvent
+        self.emgplot.scene().sigMouseMoved.disconnect()
+        return
+
+    def annotateMinMax(self, trigger_time, minmaxlist):
+        triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
+        triggerItem.setPos(trigger_time,0)
+        self.emgplot.addItem(triggerItem)
+        minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
+        self.emgplot.addItem(minItem)
+        maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
+        self.emgplot.addItem(maxItem)
+
+    def mouseMovedAddTrigger(self, evt):
+        #pos = evt[0]  ## using signal proxy turns original arguments into a tuple
+        pos = evt
+        if self.emgplot.sceneBoundingRect().contains(pos):
+            mousePoint = self.view.mapSceneToView(pos)
+            index = int(mousePoint.x())
+            #if index > 0 and index < len(data1):
+            #   label.setText("<span style='font-size: 12pt'>x=%0.1f,   <span style='color: red'>y1=%0.1f</span>,   <span style='color: green'>y2=%0.1f</span>" % (mousePoint.x(), data1[index], data2[index]))
+            self.vLine.setPos(mousePoint.x())
+            self.hLine.setPos(mousePoint.y())
 
     def showDialog(self):
             fname = QtGui.QFileDialog.getOpenFileName()
@@ -91,7 +138,8 @@ class MEPAppController(object):
                              self.signal_logic.getTriggerMins(), \
                              self.signal_logic.getTriggerMaxs(), \
                              self.signal_logic.getTriggerMeans(), \
-                             self.signal_logic.getTriggerP2Ps()]), \
+                             self.signal_logic.getTriggerP2Ps()]),
+                              \
                             np.array([0,0,0,0,self.signal_logic.getFinalAverage()])]), \
                         header="trigger,min,max,mean,peak2peak,finalAverage", delimiter=",", \
                         fmt="%.5e")
@@ -114,10 +162,14 @@ class MEPAppController(object):
         self.ui.actionCSV.setShortcut('Ctrl+S')
         self.ui.actionClear_Scene.triggered.connect(self.clearScene)
         self.ui.actionClear_Scene.setShortcut('Ctrl+W')
+        self.ui.actionManually_Add_Trigger.triggered.connect(self.addTrigger)
+        self.ui.actionManually_Add_Trigger.setShortcut('Ctrl++')
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
+        self.originalMousePressEvent = self.MainWindow.mousePressEvent
         vb = self.emgplot.getViewBox()
         vb.setMouseMode(pg.ViewBox.RectMode)
+        self.view = self.emgplot.getViewBox()
         self.MainWindow.showMaximized()
         pg.setConfigOption('leftButtonPan', False)
         sys.exit(self.app.exec_())

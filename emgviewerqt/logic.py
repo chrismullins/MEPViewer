@@ -66,6 +66,13 @@ class EMGLogic(object):
           np.array([self.timesteps[final_max_index],self.emg_signal[final_max_index]]) \
           ]
 
+    def addTriggerTimepoint(self, trigger_time):
+        new_trigger_index = np.argmin(abs(self.timesteps - trigger_time))
+        self.trigger_timepoints.append(self.timesteps[new_trigger_index])
+        response_minmax = self.findResponseMinMaxs(new_trigger_index)
+        return self.timesteps[new_trigger_index], response_minmax
+
+
     def getTriggerTimePoints(self):
         return np.array(self.trigger_timepoints)
 
@@ -79,7 +86,7 @@ class EMGLogic(object):
         return (np.array(self.trigger_mins) + np.array(self.trigger_maxs)) / 2
 
     def getTriggerP2Ps(self):
-        return abs(np.array(self.trigger_mins) + abs(np.array(self.trigger_maxs)))
+        return abs(np.array(self.trigger_mins)) + abs(np.array(self.trigger_maxs))
 
     def getFinalAverage(self):
         return np.mean(self.getTriggerP2Ps())

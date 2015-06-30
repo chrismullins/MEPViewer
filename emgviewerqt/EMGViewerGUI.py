@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\P\MEPApp\Qt\ECGViewerQt\Resources\EMGViewerGUI.ui'
 #
-# Created: Thu Jun 25 10:07:09 2015
+# Created: Mon Jun 29 10:24:07 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -58,6 +58,8 @@ class Ui_MainWindow(object):
         self.actionAnnotate_Min_Max.setObjectName(_fromUtf8("actionAnnotate_Min_Max"))
         self.actionClear_Scene = QtGui.QAction(MainWindow)
         self.actionClear_Scene.setObjectName(_fromUtf8("actionClear_Scene"))
+        self.actionManually_Add_Trigger = QtGui.QAction(MainWindow)
+        self.actionManually_Add_Trigger.setObjectName(_fromUtf8("actionManually_Add_Trigger"))
         self.menuSave.addAction(self.actionCSV)
         self.menuFile.addAction(self.actionLoad)
         self.menuFile.addAction(self.menuSave.menuAction())
@@ -65,6 +67,8 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionExit)
         self.menuActions.addAction(self.actionAnnotate_Min_Max)
         self.menuActions.addAction(self.actionClear_Scene)
+        self.menuActions.addSeparator()
+        self.menuActions.addAction(self.actionManually_Add_Trigger)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuActions.menuAction())
 
@@ -81,6 +85,7 @@ class Ui_MainWindow(object):
         self.actionExit.setText(_translate("MainWindow", "Exit", None))
         self.actionAnnotate_Min_Max.setText(_translate("MainWindow", "Annotate Min/Max", None))
         self.actionClear_Scene.setText(_translate("MainWindow", "Clear Scene", None))
+        self.actionManually_Add_Trigger.setText(_translate("MainWindow", "Manually Add Trigger", None))
 
 from pyqtgraph import PlotWidget
 
