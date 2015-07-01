@@ -23,6 +23,9 @@ class EMGLogic(object):
         self.fillTriggerDict()
 
     def fillTriggerDict(self):
+        """ Fill self.trigger_dict by detecting TMS spikes, and map those timepoints 
+        to their min and max response values.
+        """
         self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
         trigger_indices = np.array(np.ma.nonzero( np.ma.masked_less(self.emg_signal_deriv, 1.0)))
         for index in trigger_indices[0]:
@@ -30,25 +33,25 @@ class EMGLogic(object):
 
 
     def reportTriggersAndResponses(self):
-        """Return a dict of [trigger_coord: [min_coord,max_coord]]
+        """ Return a dict of [trigger_timepoint: MinMaxTuple]
         """
         self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
-        self.findTriggers()
-        for trigger_index in self.trigger_indices[0]:
+        for trigger_index in self.findTriggerIndices()[0]:
             self.trigger_timepoints.append(self.timesteps[trigger_index])
             self.trigger_time_minmax_dict[ \
               self.timesteps[trigger_index]] = self.findResponseMinMaxs(trigger_index)
         return self.trigger_time_minmax_dict
 
-    def findTriggers(self):
+    def findTriggerIndices(self):
+        """ Return a array of indices where a trigger has been detected.
+        """
         # Trigger waiting period: for paired pulse data there are two triggers within 30ms of eachother.
         # Skip ahead the corresponding number of samples to avoid tagging both triggers. Non-pp data
         # doesn't have close-together triggers so we can do this safely for both.
         trigger_waiting_period = int(0.030*self.emg_signal.sampling_rate)
         # TODO: put in the PP hack again 
         trigger_mask = np.ma.masked_less(self.emg_signal_deriv, 1.0)
-        self.trigger_indices = np.array(np.ma.nonzero(trigger_mask))
-        return
+        return np.array(np.ma.nonzero(trigger_mask))
 
 
     def findResponseMinMaxs(self, trigger_index):
@@ -77,7 +80,6 @@ class EMGLogic(object):
 
     def getTriggerTimePoints(self):
         return np.array(sorted(self.trigger_dict))
-
 
     def getTriggerMins(self):
         return np.array([self.trigger_dict[trigger_time].minValue for trigger_time in sorted(self.trigger_dict)])
