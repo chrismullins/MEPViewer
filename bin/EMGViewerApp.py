@@ -49,33 +49,49 @@ class MEPAppController(object):
         self.currentFile = None
         self.annotated = False
 
-    def annotateSignal(self):
+    def autoAnnotateSignal(self):
+        """ Detect and annotate the trigger points, min and max points on the plot.
+        """
         if not self.annotated:
-            signal_trigger_minmax_dict = self.signal_logic.reportTriggersAndResponses()
-            for trigger, minmaxlist in signal_trigger_minmax_dict.items():
-                triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
-                triggerItem.setPos(trigger,0)
-                self.emgplot.addItem(triggerItem)
-                minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-                minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
-                self.emgplot.addItem(minItem)
-                maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-                maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
-                self.emgplot.addItem(maxItem)
+            for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
+                self.annotateTriggerPoint(trigger_time)
+                self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
+                self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
             self.annotated = True
-        else:
-            print("Already annotated! Load a new file.")
+
+    def annotateTriggerPoint(self, trigger_time):
+        """ Annotate a single trigger point on the plot.
+        """
+        triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
+        triggerItem.setPos(trigger_time,0)
+        self.emgplot.addItem(triggerItem)
+        return
+
+    def annotateMinPoint(self, min_time, min_value):
+        """ Annotate a single min point on the plot.
+        """
+        minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        minItem.setPos(min_time, min_value)
+        self.emgplot.addItem(minItem)
+        return
+
+    def annotateMaxPoint(self, max_time, max_value):
+        """ Annotate a single max point on the plot.
+        """
+        maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        maxItem.setPos(max_time, max_value)
+        self.emgplot.addItem(maxItem)
         return
 
     def fileLoadSequence(self):
+        """ Load a signal from a selected file, and show the plot.
+        """
         self.currentFile = self.showDialog()
         r = emg.SpikeReader.reader(str(self.currentFile.name))
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emg_signal = r.GetEMGSignal()
         self.signal_logic = emg.EMGLogic.EMGLogic(self.emg_signal)
         self.plotDataItem = self.emgplot.plot(self.signal_logic.timesteps, self.emg_signal, pen=(255,255,255,200))
-        # self.plotDataItem.sigClicked.connect(self.clicked)
-        # self.plotDataItem.sigClicked.emit(self)
         return
 
     def addTrigger(self,ev):
@@ -90,23 +106,18 @@ class MEPAppController(object):
         view = self.emgplot.getViewBox()
         self.emgplot.removeItem(self.vLine)
         self.emgplot.removeItem(self.hLine)
-        trigger_time, response_minmax = self.signal_logic.addTriggerTimepoint( \
+        trigger_time = self.signal_logic.addTriggerTimepoint( \
             float(view.mapSceneToView(ev.pos()).x()))
-        self.annotateMinMax(trigger_time, response_minmax)
+        minmaxtuple = self.signal_logic.trigger_dict[trigger_time]
+        print minmaxtuple
+        #self.annotateMinMax(trigger_time, response_minmax)
+        self.annotateTriggerPoint(trigger_time)
+        self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
+        self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
+
         self.MainWindow.mousePressEvent = self.originalMousePressEvent
         self.emgplot.scene().sigMouseMoved.disconnect()
         return
-
-    def annotateMinMax(self, trigger_time, minmaxlist):
-        triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
-        triggerItem.setPos(trigger_time,0)
-        self.emgplot.addItem(triggerItem)
-        minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-        minItem.setPos(minmaxlist[0][0],minmaxlist[0][1])
-        self.emgplot.addItem(minItem)
-        maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-        maxItem.setPos(minmaxlist[1][0],minmaxlist[1][1])
-        self.emgplot.addItem(maxItem)
 
     def mouseMovedAddTrigger(self, evt):
         #pos = evt[0]  ## using signal proxy turns original arguments into a tuple
@@ -125,27 +136,29 @@ class MEPAppController(object):
             return f
 
     def writeToCSV(self):
-            outputPath = QtGui.QFileDialog.getSaveFileName( \
-                directory=os.path.dirname(str(self.currentFile.name)), \
-                caption="Save Response as CSV"
-                )
-            if self.annotated:
-                if outputPath:
-                    np.savetxt(str(outputPath), \
-                        np.vstack([
-                        np.hstack(arr.reshape(-1,1) for arr in \
-                            [self.signal_logic.getTriggerTimePoints(), \
-                             self.signal_logic.getTriggerMins(), \
-                             self.signal_logic.getTriggerMaxs(), \
-                             self.signal_logic.getTriggerMeans(), \
-                             self.signal_logic.getTriggerP2Ps()]),
-                              \
-                            np.array([0,0,0,0,self.signal_logic.getFinalAverage()])]), \
-                        header="trigger,min,max,mean,peak2peak,finalAverage", delimiter=",", \
-                        fmt="%.5e")
-            else:
-                print("Annotate first, then save it out!")
-            return
+        """ Write the data from this session to CSV.
+        """
+        outputPath = QtGui.QFileDialog.getSaveFileName( \
+            directory=os.path.dirname(str(self.currentFile.name)), \
+            caption="Save Response as CSV"
+            )
+        if self.annotated:
+            if outputPath:
+                np.savetxt(str(outputPath), \
+                    np.vstack([
+                    np.hstack(arr.reshape(-1,1) for arr in \
+                        [self.signal_logic.getTriggerTimePoints(), \
+                         self.signal_logic.getTriggerMins(), \
+                         self.signal_logic.getTriggerMaxs(), \
+                         self.signal_logic.getTriggerMeans(), \
+                         self.signal_logic.getTriggerP2Ps()]),
+                          \
+                        np.array([0,0,0,0,self.signal_logic.getFinalAverage()])]), \
+                    header="trigger,min,max,mean,peak2peak,finalAverage", delimiter=",", \
+                    fmt="%.5e")
+        else:
+            print("Annotate first, then save it out!")
+        return
 
     def startApp(self):
         self.app = emg.gui.QtGui.QApplication(sys.argv)
@@ -156,7 +169,7 @@ class MEPAppController(object):
         self.ui.actionExit.setShortcut('Ctrl+X')
         self.ui.actionLoad.triggered.connect(self.fileLoadSequence)
         self.ui.actionLoad.setShortcut('Ctrl+O')
-        self.ui.actionAnnotate_Min_Max.triggered.connect(self.annotateSignal)
+        self.ui.actionAnnotate_Min_Max.triggered.connect(self.autoAnnotateSignal)
         self.ui.actionAnnotate_Min_Max.setShortcut('Ctrl+A')
         self.ui.actionCSV.triggered.connect(self.writeToCSV)
         self.ui.actionCSV.setShortcut('Ctrl+S')
