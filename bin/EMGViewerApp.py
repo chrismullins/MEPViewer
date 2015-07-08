@@ -59,7 +59,6 @@ class MEPAppController(object):
                     self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
                     self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
             elif self.ui.comboBox.currentText() == "Cortical Silent Period":
-                #print self.ui.comboBox.currentText()
                 for trigger_time, csptuple in self.signal_logic.trigger_dict.items():
                     self.annotateTriggerPoint(trigger_time)
                     self.annotateMinPoint(csptuple.cspStartTime, csptuple.cspStartValue)
@@ -120,8 +119,6 @@ class MEPAppController(object):
         trigger_time = self.signal_logic.addTriggerTimepoint( \
             float(view.mapSceneToView(ev.pos()).x()))
         minmaxtuple = self.signal_logic.trigger_dict[trigger_time]
-        print minmaxtuple
-        #self.annotateMinMax(trigger_time, response_minmax)
         self.annotateTriggerPoint(trigger_time)
         self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
         self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
@@ -194,7 +191,6 @@ class MEPAppController(object):
         self.ui.comboBox.activated.connect(self.modeChanged)
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
-        #self.ui.dockWidget.resize(200,200)
         self.ui.dockWidget.setMinimumWidth(220)
         self.originalMousePressEvent = self.MainWindow.mousePressEvent
         vb = self.emgplot.getViewBox()
