@@ -6,3 +6,4 @@ import EMGViewerGUI as gui
 import reader as SpikeReader
 import utils as utils
 import logic as EMGLogic
+import csplogic as CSPLogic
