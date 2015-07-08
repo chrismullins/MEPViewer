@@ -53,10 +53,16 @@ class MEPAppController(object):
         """ Detect and annotate the trigger points, min and max points on the plot.
         """
         if not self.annotated:
-            for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
-                self.annotateTriggerPoint(trigger_time)
-                self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
-                self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
+            if self.ui.comboBox.currentText() == "PAS":
+                for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
+                    self.annotateTriggerPoint(trigger_time)
+                    self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
+                    self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
+            elif self.ui.comboBox.currentText() == "Cortical Silent Period":
+                for trigger_time, csptuple in self.signal_logic.trigger_dict.items():
+                    self.annotateTriggerPoint(trigger_time)
+                    self.annotateMinPoint(csptuple.cspStartTime, csptuple.cspStartValue)
+                    self.annotateMaxPoint(csptuple.cspEndTime, csptuple.cspEndValue)
             self.annotated = True
 
     def annotateTriggerPoint(self, trigger_time):
@@ -90,8 +96,12 @@ class MEPAppController(object):
         r = emg.SpikeReader.reader(str(self.currentFile.name))
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emg_signal = r.GetEMGSignal()
-        self.signal_logic = emg.EMGLogic.EMGLogic(self.emg_signal)
+        if self.ui.comboBox.currentText() == "PAS":
+            self.signal_logic = emg.EMGLogic.EMGLogic(self.emg_signal)
+        elif self.ui.comboBox.currentText() == "Cortical Silent Period":
+            self.signal_logic = emg.CSPLogic.CSPLogic(self.emg_signal)
         self.plotDataItem = self.emgplot.plot(self.signal_logic.timesteps, self.emg_signal, pen=(255,255,255,200))
+        self.ui.lineEdit.setText(self.currentFile.name)
         return
 
     def addTrigger(self,ev):
@@ -109,8 +119,6 @@ class MEPAppController(object):
         trigger_time = self.signal_logic.addTriggerTimepoint( \
             float(view.mapSceneToView(ev.pos()).x()))
         minmaxtuple = self.signal_logic.trigger_dict[trigger_time]
-        print minmaxtuple
-        #self.annotateMinMax(trigger_time, response_minmax)
         self.annotateTriggerPoint(trigger_time)
         self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
         self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
@@ -131,9 +139,12 @@ class MEPAppController(object):
             self.hLine.setPos(mousePoint.y())
 
     def showDialog(self):
-            fname = QtGui.QFileDialog.getOpenFileName()
-            f = open(fname, 'r')
-            return f
+        fname = QtGui.QFileDialog.getOpenFileName()
+        f = open(fname, 'r')
+        return f
+
+    def modeChanged(self):
+        print self.ui.comboBox.currentText()
 
     def writeToCSV(self):
         """ Write the data from this session to CSV.
@@ -177,8 +188,10 @@ class MEPAppController(object):
         self.ui.actionClear_Scene.setShortcut('Ctrl+W')
         self.ui.actionManually_Add_Trigger.triggered.connect(self.addTrigger)
         self.ui.actionManually_Add_Trigger.setShortcut('Ctrl++')
+        self.ui.comboBox.activated.connect(self.modeChanged)
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
+        self.ui.dockWidget.setMinimumWidth(220)
         self.originalMousePressEvent = self.MainWindow.mousePressEvent
         vb = self.emgplot.getViewBox()
         vb.setMouseMode(pg.ViewBox.RectMode)
