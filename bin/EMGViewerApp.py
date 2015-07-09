@@ -72,18 +72,19 @@ class MEPAppController(object):
             self.maxAnnotationLst = []
         if self.ui.comboBox.currentText() == "PAS":
             for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
-                self.annotateTriggerPoint(trigger_time)
-                self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
-                self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
+                self.placeTriggerArrow(trigger_time)
+                self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
+                self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
         elif self.ui.comboBox.currentText() == "Cortical Silent Period":
             for trigger_time, csptuple in self.signal_logic.trigger_dict.items():
-                self.annotateTriggerPoint(trigger_time)
-                self.annotateMinPoint(csptuple.cspStartTime, csptuple.cspStartValue)
-                self.annotateMaxPoint(csptuple.cspEndTime, csptuple.cspEndValue)
+                self.placeTriggerArrow(trigger_time)
+                self.placeUpArrow(csptuple.cspStartTime, csptuple.cspStartValue)
+                self.placeDownArrow(csptuple.cspEndTime, csptuple.cspEndValue)
         self.annotated = True
 
-    def annotateTriggerPoint(self, trigger_time):
-        """ Annotate a single trigger point on the plot.
+    def placeTriggerArrow(self, trigger_time):
+        """ Place a trigger arrow (solid, upward) point on the 
+        x-axis at the specified area.
         """
         triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
         triggerItem.setPos(trigger_time,0)
@@ -91,20 +92,20 @@ class MEPAppController(object):
         self.emgplot.addItem(triggerItem)
         return
 
-    def annotateMinPoint(self, min_time, min_value):
-        """ Annotate a single min point on the plot.
+    def placeUpArrow(self, x_pos, y_pos):
+        """ Place a single unfilled upward arrow on the plot.
         """
         minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-        minItem.setPos(min_time, min_value)
+        minItem.setPos(x_pos, y_pos)
         self.minAnnotationList.append(minItem)
         self.emgplot.addItem(minItem)
         return
 
-    def annotateMaxPoint(self, max_time, max_value):
-        """ Annotate a single max point on the plot.
+    def placeDownArrow(self, x_pos, y_pos):
+        """ Place a single unfilled upward arrow on the plot.
         """
         maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
-        maxItem.setPos(max_time, max_value)
+        maxItem.setPos(x_pos, y_pos)
         self.maxAnnotationList.append(maxItem)
         self.emgplot.addItem(maxItem)
         return
@@ -187,19 +188,7 @@ class MEPAppController(object):
             caption="Save Response as CSV"
             )
         if self.annotated:
-            if outputPath:
-                np.savetxt(str(outputPath), \
-                    np.vstack([
-                    np.hstack(arr.reshape(-1,1) for arr in \
-                        [self.signal_logic.getTriggerTimePoints(), \
-                         self.signal_logic.getTriggerMins(), \
-                         self.signal_logic.getTriggerMaxs(), \
-                         self.signal_logic.getTriggerMeans(), \
-                         self.signal_logic.getTriggerP2Ps()]),
-                          \
-                        np.array([0,0,0,0,self.signal_logic.getFinalAverage()])]), \
-                    header="trigger,min,max,mean,peak2peak,finalAverage", delimiter=",", \
-                    fmt="%.5e")
+            self.signal_logic.writeInfoToCSV(str(outputPath))
         else:
             print("Annotate first, then save it out!")
         return
