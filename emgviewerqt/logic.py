@@ -70,6 +70,20 @@ class EMGLogic(object):
             self.findResponseMinMaxs(new_trigger_index)
         return self.timesteps[new_trigger_index]
 
+    def writeInfoToCSV(self, outputPath):
+        np.savetxt(outputPath, \
+            np.vstack([
+            np.hstack(arr.reshape(-1,1) for arr in \
+                [self.getTriggerTimePoints(), \
+                 self.getTriggerMins(), \
+                 self.getTriggerMaxs(), \
+                 self.getTriggerMeans(), \
+                 self.getTriggerP2Ps()]),
+                  \
+                np.array([0,0,0,0,self.getFinalAverage()])]), \
+            header="trigger,min,max,mean,peak2peak,finalAverage", delimiter=",", \
+            fmt="%.5e")
+
     def getTriggerTimePoints(self):
         return np.array(sorted(self.trigger_dict))
 
