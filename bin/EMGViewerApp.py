@@ -37,9 +37,16 @@ class MEPAppController(object):
         self.annotated = False
         self.plotDataItem = None
         self.view = None
+        # For addTrigger manually
         self.vLine = None
         self.hLine = None
         self.originalMousePressEvent = None
+
+        # For tracking annotations
+        self.triggerAnnotationList = []
+        self.minAnnotationList = []
+        self.maxAnnotationList = []
+
         self.startApp()
 
     def clearScene(self):
@@ -52,24 +59,35 @@ class MEPAppController(object):
     def autoAnnotateSignal(self):
         """ Detect and annotate the trigger points, min and max points on the plot.
         """
-        if not self.annotated:
-            if self.ui.comboBox.currentText() == "PAS":
-                for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
-                    self.annotateTriggerPoint(trigger_time)
-                    self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
-                    self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
-            elif self.ui.comboBox.currentText() == "Cortical Silent Period":
-                for trigger_time, csptuple in self.signal_logic.trigger_dict.items():
-                    self.annotateTriggerPoint(trigger_time)
-                    self.annotateMinPoint(csptuple.cspStartTime, csptuple.cspStartValue)
-                    self.annotateMaxPoint(csptuple.cspEndTime, csptuple.cspEndValue)
-            self.annotated = True
+        if len(self.triggerAnnotationList) > 0:
+            # Delete all of the annotations
+            for item in self.triggerAnnotationList:
+                self.emgplot.removeItem(item)
+            for item in self.minAnnotationList:
+                self.emgplot.removeItem(item)
+            for item in self.maxAnnotationList:
+                self.emgplot.removeItem(item)
+            self.triggerAnnotationList = []
+            self.minAnnotationList = []
+            self.maxAnnotationLst = []
+        if self.ui.comboBox.currentText() == "PAS":
+            for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
+                self.annotateTriggerPoint(trigger_time)
+                self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
+                self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
+        elif self.ui.comboBox.currentText() == "Cortical Silent Period":
+            for trigger_time, csptuple in self.signal_logic.trigger_dict.items():
+                self.annotateTriggerPoint(trigger_time)
+                self.annotateMinPoint(csptuple.cspStartTime, csptuple.cspStartValue)
+                self.annotateMaxPoint(csptuple.cspEndTime, csptuple.cspEndValue)
+        self.annotated = True
 
     def annotateTriggerPoint(self, trigger_time):
         """ Annotate a single trigger point on the plot.
         """
         triggerItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=-30, headLen=40, tailLen=None)
         triggerItem.setPos(trigger_time,0)
+        self.triggerAnnotationList.append(triggerItem)
         self.emgplot.addItem(triggerItem)
         return
 
@@ -78,6 +96,7 @@ class MEPAppController(object):
         """
         minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
         minItem.setPos(min_time, min_value)
+        self.minAnnotationList.append(minItem)
         self.emgplot.addItem(minItem)
         return
 
@@ -86,6 +105,7 @@ class MEPAppController(object):
         """
         maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
         maxItem.setPos(max_time, max_value)
+        self.maxAnnotationList.append(maxItem)
         self.emgplot.addItem(maxItem)
         return
 
@@ -97,7 +117,10 @@ class MEPAppController(object):
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emg_signal = r.GetEMGSignal()
         if self.ui.comboBox.currentText() == "PAS":
-            self.signal_logic = emg.EMGLogic.EMGLogic(self.emg_signal)
+            self.signal_logic = emg.EMGLogic.EMGLogic(emg_signal=self.emg_signal, \
+                trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
+                window_begin=self.ui.pas_response_delay_spinbox.value(), \
+                window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value())
         elif self.ui.comboBox.currentText() == "Cortical Silent Period":
             self.signal_logic = emg.CSPLogic.CSPLogic(self.emg_signal)
         self.plotDataItem = self.emgplot.plot(self.signal_logic.timesteps, self.emg_signal, pen=(255,255,255,200))
@@ -146,6 +169,16 @@ class MEPAppController(object):
     def modeChanged(self):
         print self.ui.comboBox.currentText()
 
+    def pasParametersChanged(self):
+        """ Let the signal_logic update its internal dict of triggers/min and maxs
+        each time we change a parameter.  This is fast so it doesn't really matter.
+        Alternatively, we could put this step off until asked to plot it.
+        """
+        self.signal_logic.updateParameters(threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
+                begin=self.ui.pas_response_delay_spinbox.value(), \
+                end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value())
+
+
     def writeToCSV(self):
         """ Write the data from this session to CSV.
         """
@@ -189,6 +222,9 @@ class MEPAppController(object):
         self.ui.actionManually_Add_Trigger.triggered.connect(self.addTrigger)
         self.ui.actionManually_Add_Trigger.setShortcut('Ctrl++')
         self.ui.comboBox.activated.connect(self.modeChanged)
+        self.ui.pas_response_delay_spinbox.valueChanged.connect(self.pasParametersChanged)
+        self.ui.pas_response_window_spinbox.valueChanged.connect(self.pasParametersChanged)
+        self.ui.pas_trigger_threshold_spinbox.valueChanged.connect(self.pasParametersChanged)
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
         self.ui.dockWidget.setMinimumWidth(220)

@@ -9,50 +9,42 @@ class EMGLogic(object):
         dt = float(signal.sampling_period)
         return np.linspace(0.0, float(dt*signal.size - dt), num=signal.size)
 
-    def createSignalDeriv(self, signal):
-        return np.diff(signal)
-
-    def __init__(self, emg_signal, window_begin=0.02, window_end=0.10):
+    def __init__(self, emg_signal, trigger_threshold=1.0, window_begin=0.02, window_end=0.10):
         self.emg_signal = emg_signal
+        self.emg_signal_deriv = np.diff(self.emg_signal)
+        self.trigger_threshold = trigger_threshold
         self.timesteps = self.createTimeStepsArray(emg_signal)
-        self.response_window_time = np.array([window_begin,window_end])
-        self.response_window_indices = self.response_window_time*emg_signal.sampling_rate
-        self.emg_signal_deriv = None
         self.MinMaxTuple = collections.namedtuple('MinMaxTuple', 'minTime minValue maxTime maxValue')
+        self.updateParameters(window_begin, window_end, trigger_threshold)
+
+    def updateParameters(self, begin, end, threshold):
         self.trigger_dict = dict()
+        self.window_begin = begin
+        self.window_end = end
+        self.trigger_threshold = threshold
+        self.response_window_time = np.array([self.window_begin,self.window_end])
+        self.response_window_indices = self.response_window_time*self.emg_signal.sampling_rate
         self.fillTriggerDict()
 
     def fillTriggerDict(self):
         """ Fill self.trigger_dict by detecting TMS spikes, and map those timepoints 
         to their min and max response values.
         """
-        self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
-        trigger_indices = np.array(np.ma.nonzero( np.ma.masked_less(self.emg_signal_deriv, 1.0)))
-        for index in trigger_indices[0]:
+        trigger_indices = self.findTriggerIndices(self.emg_signal_deriv, self.trigger_threshold)
+        for index in trigger_indices:
             self.trigger_dict[self.timesteps[index]] = self.findResponseMinMaxs(index)
 
-
-    def reportTriggersAndResponses(self):
-        """ Return a dict of [trigger_timepoint: MinMaxTuple]
-        """
-        self.emg_signal_deriv = self.createSignalDeriv(self.emg_signal)
-        for trigger_index in self.findTriggerIndices()[0]:
-            self.trigger_timepoints.append(self.timesteps[trigger_index])
-            self.trigger_time_minmax_dict[ \
-              self.timesteps[trigger_index]] = self.findResponseMinMaxs(trigger_index)
-        return self.trigger_time_minmax_dict
-
-    def findTriggerIndices(self):
-        """ Return a array of indices where a trigger has been detected.
+    def findTriggerIndices(self, signal_deriv, threshold):
+        """Given a signal, return the indices which are less than a certain
+        threshold.
         """
         # Trigger waiting period: for paired pulse data there are two triggers within 30ms of eachother.
         # Skip ahead the corresponding number of samples to avoid tagging both triggers. Non-pp data
         # doesn't have close-together triggers so we can do this safely for both.
         trigger_waiting_period = int(0.030*self.emg_signal.sampling_rate)
         # TODO: put in the PP hack again 
-        trigger_mask = np.ma.masked_less(self.emg_signal_deriv, 1.0)
-        return np.array(np.ma.nonzero(trigger_mask))
-
+        trigger_list, = list(np.ma.nonzero(np.ma.masked_less(signal_deriv, threshold)))
+        return trigger_list
 
     def findResponseMinMaxs(self, trigger_index):
         """Find the min and max response after a trigger
