@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\P\MEPApp\Qt\ECGViewerQt\Resources\EMGViewerGUI.ui'
 #
-# Created: Fri Jul 10 10:40:40 2015
+# Created: Fri Jul 10 14:59:03 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.gridLayout = QtGui.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.graphicsView = PlotWidget(self.centralwidget)
+        self.graphicsView = GraphicsLayoutWidget(self.centralwidget)
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
         self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -111,17 +111,19 @@ class Ui_MainWindow(object):
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.gridLayout_4 = QtGui.QGridLayout(self.groupBox_2)
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
+        self.csp_csp_threshold_spinbox = QtGui.QDoubleSpinBox(self.groupBox_2)
+        self.csp_csp_threshold_spinbox.setSingleStep(0.01)
+        self.csp_csp_threshold_spinbox.setProperty("value", 0.1)
+        self.csp_csp_threshold_spinbox.setObjectName(_fromUtf8("csp_csp_threshold_spinbox"))
+        self.gridLayout_4.addWidget(self.csp_csp_threshold_spinbox, 0, 1, 1, 1)
+        self.label_14 = QtGui.QLabel(self.groupBox_2)
+        self.label_14.setObjectName(_fromUtf8("label_14"))
+        self.gridLayout_4.addWidget(self.label_14, 0, 0, 1, 1)
         self.csp_trigger_threshold_spinbox = QtGui.QDoubleSpinBox(self.groupBox_2)
         self.csp_trigger_threshold_spinbox.setSingleStep(0.1)
         self.csp_trigger_threshold_spinbox.setProperty("value", 1.0)
         self.csp_trigger_threshold_spinbox.setObjectName(_fromUtf8("csp_trigger_threshold_spinbox"))
         self.gridLayout_4.addWidget(self.csp_trigger_threshold_spinbox, 1, 1, 1, 1)
-        self.label_4 = QtGui.QLabel(self.groupBox_2)
-        self.label_4.setObjectName(_fromUtf8("label_4"))
-        self.gridLayout_4.addWidget(self.label_4, 2, 0, 1, 1)
-        self.label_8 = QtGui.QLabel(self.groupBox_2)
-        self.label_8.setObjectName(_fromUtf8("label_8"))
-        self.gridLayout_4.addWidget(self.label_8, 1, 0, 1, 1)
         self.csp_response_delay_spinbox = QtGui.QDoubleSpinBox(self.groupBox_2)
         self.csp_response_delay_spinbox.setSingleStep(0.1)
         self.csp_response_delay_spinbox.setObjectName(_fromUtf8("csp_response_delay_spinbox"))
@@ -131,17 +133,18 @@ class Ui_MainWindow(object):
         self.csp_response_window_spinbox.setProperty("value", 1.0)
         self.csp_response_window_spinbox.setObjectName(_fromUtf8("csp_response_window_spinbox"))
         self.gridLayout_4.addWidget(self.csp_response_window_spinbox, 3, 1, 1, 1)
-        self.label_9 = QtGui.QLabel(self.groupBox_2)
-        self.label_9.setObjectName(_fromUtf8("label_9"))
-        self.gridLayout_4.addWidget(self.label_9, 3, 0, 1, 1)
-        self.csp_csp_threshold_spinbox = QtGui.QDoubleSpinBox(self.groupBox_2)
-        self.csp_csp_threshold_spinbox.setSingleStep(0.01)
-        self.csp_csp_threshold_spinbox.setProperty("value", 0.1)
-        self.csp_csp_threshold_spinbox.setObjectName(_fromUtf8("csp_csp_threshold_spinbox"))
-        self.gridLayout_4.addWidget(self.csp_csp_threshold_spinbox, 0, 1, 1, 1)
-        self.label_10 = QtGui.QLabel(self.groupBox_2)
-        self.label_10.setObjectName(_fromUtf8("label_10"))
-        self.gridLayout_4.addWidget(self.label_10, 0, 0, 1, 1)
+        self.label_12 = QtGui.QLabel(self.groupBox_2)
+        self.label_12.setObjectName(_fromUtf8("label_12"))
+        self.gridLayout_4.addWidget(self.label_12, 1, 0, 1, 1)
+        self.label_4 = QtGui.QLabel(self.groupBox_2)
+        self.label_4.setObjectName(_fromUtf8("label_4"))
+        self.gridLayout_4.addWidget(self.label_4, 2, 0, 1, 1)
+        self.label_13 = QtGui.QLabel(self.groupBox_2)
+        self.label_13.setObjectName(_fromUtf8("label_13"))
+        self.gridLayout_4.addWidget(self.label_13, 3, 0, 1, 1)
+        self.csp_duration_vs_time_checkbox = QtGui.QCheckBox(self.groupBox_2)
+        self.csp_duration_vs_time_checkbox.setObjectName(_fromUtf8("csp_duration_vs_time_checkbox"))
+        self.gridLayout_4.addWidget(self.csp_duration_vs_time_checkbox, 4, 0, 1, 2)
         self.gridLayout_3.addWidget(self.groupBox_2, 2, 0, 1, 1)
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget)
@@ -189,10 +192,11 @@ class Ui_MainWindow(object):
         self.label_7.setText(_translate("MainWindow", "Response Window (s):", None))
         self.label_5.setText(_translate("MainWindow", "Response Delay (s):", None))
         self.groupBox_2.setTitle(_translate("MainWindow", "Cortical Silent Period Parameters", None))
+        self.label_14.setText(_translate("MainWindow", "CSP Threshold", None))
+        self.label_12.setText(_translate("MainWindow", "Trigger Threshold:", None))
         self.label_4.setText(_translate("MainWindow", "Response Delay (s):", None))
-        self.label_8.setText(_translate("MainWindow", "Trigger Threshold:", None))
-        self.label_9.setText(_translate("MainWindow", "Response Window (s):", None))
-        self.label_10.setText(_translate("MainWindow", "CSP Threshold", None))
+        self.label_13.setText(_translate("MainWindow", "Response Window (s):", None))
+        self.csp_duration_vs_time_checkbox.setText(_translate("MainWindow", "Show CSP Duration vs Time Plot", None))
         self.actionLoad.setText(_translate("MainWindow", "Load", None))
         self.actionCSV.setText(_translate("MainWindow", "CSV", None))
         self.actionExit.setText(_translate("MainWindow", "Exit", None))
@@ -200,7 +204,7 @@ class Ui_MainWindow(object):
         self.actionClear_Scene.setText(_translate("MainWindow", "Clear Scene", None))
         self.actionManually_Add_Trigger.setText(_translate("MainWindow", "Manually Add Trigger", None))
 
-from pyqtgraph import PlotWidget
+from pyqtgraph import GraphicsLayoutWidget
 
 if __name__ == "__main__":
     import sys
