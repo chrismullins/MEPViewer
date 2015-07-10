@@ -77,4 +77,32 @@ class CSPLogic(object):
                                      cspEndValue=self.emg_signal[absolute_end_index])
         return triggerTuple
 
+    def writeInfoToCSV(self, outputPath):
+        np.savetxt(outputPath, \
+            np.vstack([
+            np.hstack(arr.reshape(-1,1) for arr in \
+                [self.getTriggerTimePoints(), \
+                 self.getCSPStartTimes(), \
+                 self.getCSPEndTimes(), \
+                 self.getCSPDurations()]),
+                  \
+                np.array([0,0,0,self.getAverageCSPDuration()])]), \
+            header="trigger,csp_start,csp_end,csp_duration,average_csp_duration", delimiter=",", \
+            fmt="%.5e")
+
+    def getTriggerTimePoints(self):
+        return np.array(sorted(self.trigger_dict))
+
+    def getCSPStartTimes(self):
+        return np.array([self.trigger_dict[trigger_time].cspStartTime for trigger_time in sorted(self.trigger_dict)])
+
+    def getCSPEndTimes(self):
+        return np.array([self.trigger_dict[trigger_time].cspEndTime for trigger_time in sorted(self.trigger_dict)])
+
+    def getCSPDurations(self):
+        return self.getCSPEndTimes() - self.getCSPStartTimes()
+
+    def getAverageCSPDuration(self):
+        return np.mean(self.getCSPDurations())
+
 
