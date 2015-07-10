@@ -9,10 +9,13 @@ class EMGLogic(object):
         dt = float(signal.sampling_period)
         return np.linspace(0.0, float(dt*signal.size - dt), num=signal.size)
 
-    def __init__(self, emg_signal, trigger_threshold=1.0, window_begin=0.02, window_end=0.10):
+    def __init__(self, emg_signal, trigger_threshold=1.0, window_begin=0.02, window_end=0.10, \
+     paired_pulse=True, pp_interval=0.03):
         self.emg_signal = emg_signal
         self.emg_signal_deriv = np.diff(self.emg_signal)
         self.trigger_threshold = trigger_threshold
+        self.paired_pulse = paired_pulse
+        self.pp_interval = pp_interval
         self.timesteps = self.createTimeStepsArray(emg_signal)
         self.MinMaxTuple = collections.namedtuple('MinMaxTuple', 'minTime minValue maxTime maxValue')
         self.updateParameters(window_begin, window_end, trigger_threshold)
@@ -38,12 +41,18 @@ class EMGLogic(object):
         """Given a signal, return the indices which are less than a certain
         threshold.
         """
+        trigger_array, = np.ma.nonzero(np.ma.masked_less(signal_deriv, threshold))
+        trigger_list = trigger_array.tolist()
         # Trigger waiting period: for paired pulse data there are two triggers within 30ms of eachother.
         # Skip ahead the corresponding number of samples to avoid tagging both triggers. Non-pp data
         # doesn't have close-together triggers so we can do this safely for both.
-        trigger_waiting_period = int(0.030*self.emg_signal.sampling_rate)
-        # TODO: put in the PP hack again 
-        trigger_list, = list(np.ma.nonzero(np.ma.masked_less(signal_deriv, threshold)))
+        if self.paired_pulse:
+            trigger_waiting_period = int(self.pp_interval*self.emg_signal.sampling_rate)
+            # Quick way to find which triggers are close together
+            secondary_triggers_indices, = np.where(abs(np.diff(trigger_list)) < trigger_waiting_period)
+            # Delete-by-index must be done in reverse order.  Otherwise all the indices shift
+            for sec_trigger in sorted(secondary_triggers_indices, reverse=True):
+                del trigger_list[sec_trigger+1]
         return trigger_list
 
     def findResponseMinMaxs(self, trigger_index):
