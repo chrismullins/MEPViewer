@@ -180,7 +180,11 @@ class MEPAppController(object):
                 window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
                 paired_pulse=True)
         elif self.ui.comboBox.currentText() == "Cortical Silent Period":
-            self.signal_logic = emg.CSPLogic.CSPLogic(self.emg_signal)
+            self.signal_logic = emg.CSPLogic.CSPLogic(emg_signal=self.emg_signal, \
+                trigger_threshold=self.ui.csp_trigger_threshold_spinbox.value(), \
+                window_begin=self.ui.csp_response_delay_spinbox.value(), \
+                window_end=self.ui.csp_response_delay_spinbox.value() + self.ui.csp_response_window_spinbox.value(), \
+                csp_threshold=self.ui.csp_csp_threshold_spinbox.value())
         return
 
 
@@ -192,6 +196,15 @@ class MEPAppController(object):
         self.signal_logic.updateParameters(threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
                 begin=self.ui.pas_response_delay_spinbox.value(), \
                 end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value())
+
+    def cspParametersChanged(self):
+        """ Let the signal_logic update its internal dict of triggers and csp durations
+        each time we change a parameters.
+        """
+        self.signal_logic.updateParameters(trigger_threshold=self.ui.csp_trigger_threshold_spinbox.value(), \
+            begin=self.ui.csp_response_delay_spinbox.value(), \
+            end=self.ui.csp_response_delay_spinbox.value() + self.ui.csp_response_window_spinbox.value(), \
+            csp_threshold=self.ui.csp_csp_threshold_spinbox.value())
 
 
     def writeToCSV(self):
@@ -228,6 +241,10 @@ class MEPAppController(object):
         self.ui.pas_response_delay_spinbox.valueChanged.connect(self.pasParametersChanged)
         self.ui.pas_response_window_spinbox.valueChanged.connect(self.pasParametersChanged)
         self.ui.pas_trigger_threshold_spinbox.valueChanged.connect(self.pasParametersChanged)
+        self.ui.csp_csp_threshold_spinbox.valueChanged.connect(self.cspParametersChanged)
+        self.ui.csp_response_delay_spinbox.valueChanged.connect(self.cspParametersChanged)
+        self.ui.csp_response_window_spinbox.valueChanged.connect(self.cspParametersChanged)
+        self.ui.csp_trigger_threshold_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
         self.ui.dockWidget.setMinimumWidth(220)
