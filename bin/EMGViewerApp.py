@@ -47,6 +47,9 @@ class MEPAppController(object):
         self.minAnnotationList = []
         self.maxAnnotationList = []
 
+        # Keep track of additional plots
+        self.lower_plot = None
+
         self.startApp()
 
     def clearScene(self):
@@ -80,6 +83,11 @@ class MEPAppController(object):
                 self.placeTriggerArrow(trigger_time)
                 self.placeUpArrow(csptuple.cspStartTime, csptuple.cspStartValue)
                 self.placeDownArrow(csptuple.cspEndTime, csptuple.cspEndValue)
+                if self.lower_plot:
+                    trigger_times = self.signal_logic.getTriggerTimePoints()
+                    csp_durations = self.signal_logic.getCSPDurations()
+                    self.lower_plot.plot(trigger_times, csp_durations, pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+
         self.annotated = True
 
     def placeTriggerArrow(self, trigger_time):
@@ -115,7 +123,6 @@ class MEPAppController(object):
         """
         self.currentFile = self.showDialog()
         r = emg.SpikeReader.reader(str(self.currentFile.name))
-        self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emg_signal = r.GetEMGSignal()
         self.setSignalLogicMode()
         self.plotDataItem = self.emgplot.plot(self.signal_logic.timesteps, self.emg_signal, pen=(255,255,255,200))
@@ -220,6 +227,17 @@ class MEPAppController(object):
             print("Annotate first, then save it out!")
         return
 
+    def addNewPlot(self):
+        self.ui.graphicsView.addPlot(title="NEWPLOT")
+
+    def cspLowerPlotChanged(self):
+        if self.ui.csp_duration_vs_time_checkbox.isChecked():
+            self.ui.graphicsView.nextRow()
+            self.lower_plot = self.ui.graphicsView.addPlot(title="CSP Duration vs Time")
+        else:
+            self.ui.graphicsView.removeItem(self.lower_plot)
+            self.lower_plot = None
+
     def startApp(self):
         self.app = emg.gui.QtGui.QApplication(sys.argv)
         self.MainWindow = emg.gui.QtGui.QMainWindow()
@@ -245,7 +263,8 @@ class MEPAppController(object):
         self.ui.csp_response_delay_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.ui.csp_response_window_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.ui.csp_trigger_threshold_spinbox.valueChanged.connect(self.cspParametersChanged)
-        self.emgplot = self.ui.graphicsView.getPlotItem()
+        self.ui.csp_duration_vs_time_checkbox.stateChanged.connect(self.cspLowerPlotChanged)
+        self.emgplot = self.ui.graphicsView.addPlot(title="EMG Signal")
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
         self.ui.dockWidget.setMinimumWidth(220)
         self.originalMousePressEvent = self.MainWindow.mousePressEvent
