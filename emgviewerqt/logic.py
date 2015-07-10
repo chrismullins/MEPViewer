@@ -75,13 +75,15 @@ class EMGLogic(object):
             np.vstack([
             np.hstack(arr.reshape(-1,1) for arr in \
                 [self.getTriggerTimePoints(), \
+                 self.getTriggerMinTimes(), \
                  self.getTriggerMins(), \
+                 self.getTriggerMaxTimes(), \
                  self.getTriggerMaxs(), \
                  self.getTriggerMeans(), \
                  self.getTriggerP2Ps()]),
                   \
-                np.array([0,0,0,0,self.getFinalAverage()])]), \
-            header="trigger,min,max,mean,peak2peak,finalAverage", delimiter=",", \
+                np.array([0,0,0,0,0,0,self.getFinalAverage()])]), \
+            header="trigger,min_time,min_value,max_time,max_value,mean,peak2peak,finalAverage", delimiter=",", \
             fmt="%.5e")
 
     def getTriggerTimePoints(self):
@@ -90,8 +92,14 @@ class EMGLogic(object):
     def getTriggerMins(self):
         return np.array([self.trigger_dict[trigger_time].minValue for trigger_time in sorted(self.trigger_dict)])
 
+    def getTriggerMinTimes(self):
+        return np.array([self.trigger_dict[trigger_time].minTime for trigger_time in sorted(self.trigger_dict)])
+
     def getTriggerMaxs(self):
         return np.array([self.trigger_dict[trigger_time].maxValue for trigger_time in sorted(self.trigger_dict)])
+
+    def getTriggerMaxTimes(self):
+        return np.array([self.trigger_dict[trigger_time].maxTime for trigger_time in sorted(self.trigger_dict)])
 
     def getTriggerMeans(self):
         return (self.getTriggerMins() + self.getTriggerMaxs()) / 2
