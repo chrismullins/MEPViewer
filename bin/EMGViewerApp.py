@@ -70,7 +70,7 @@ class MEPAppController(object):
             self.triggerAnnotationList = []
             self.minAnnotationList = []
             self.maxAnnotationLst = []
-        if self.ui.comboBox.currentText() == "PAS":
+        if self.ui.comboBox.currentText() == "PAS" or self.ui.comboBox.currentText() == "Paired Pulse":
             for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
                 self.placeTriggerArrow(trigger_time)
                 self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
@@ -117,13 +117,7 @@ class MEPAppController(object):
         r = emg.SpikeReader.reader(str(self.currentFile.name))
         self.emgplot = self.ui.graphicsView.getPlotItem()
         self.emg_signal = r.GetEMGSignal()
-        if self.ui.comboBox.currentText() == "PAS":
-            self.signal_logic = emg.EMGLogic.EMGLogic(emg_signal=self.emg_signal, \
-                trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
-                window_begin=self.ui.pas_response_delay_spinbox.value(), \
-                window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value())
-        elif self.ui.comboBox.currentText() == "Cortical Silent Period":
-            self.signal_logic = emg.CSPLogic.CSPLogic(self.emg_signal)
+        self.setSignalLogicMode()
         self.plotDataItem = self.emgplot.plot(self.signal_logic.timesteps, self.emg_signal, pen=(255,255,255,200))
         self.ui.lineEdit.setText(self.currentFile.name)
         return
@@ -169,6 +163,26 @@ class MEPAppController(object):
 
     def modeChanged(self):
         print self.ui.comboBox.currentText()
+        if self.currentFile:
+            self.setSignalLogicMode()
+
+    def setSignalLogicMode(self):
+        if self.ui.comboBox.currentText() == "PAS":
+            self.signal_logic = emg.EMGLogic.EMGLogic(emg_signal=self.emg_signal, \
+                trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
+                window_begin=self.ui.pas_response_delay_spinbox.value(), \
+                window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
+                paired_pulse=False)
+        elif self.ui.comboBox.currentText() == "Paired Pulse":
+            self.signal_logic = emg.EMGLogic.EMGLogic(emg_signal=self.emg_signal, \
+                trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
+                window_begin=self.ui.pas_response_delay_spinbox.value(), \
+                window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
+                paired_pulse=True)
+        elif self.ui.comboBox.currentText() == "Cortical Silent Period":
+            self.signal_logic = emg.CSPLogic.CSPLogic(self.emg_signal)
+        return
+
 
     def pasParametersChanged(self):
         """ Let the signal_logic update its internal dict of triggers/min and maxs
