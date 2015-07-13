@@ -6,6 +6,7 @@ import sys
 import time
 import pyqtgraph as pg
 import numpy as np
+import collections
 
 from PyQt4 import QtGui, QtCore
 # Since posix symlinks are not supported on windows, let's
@@ -46,6 +47,7 @@ class MEPAppController(object):
         self.triggerAnnotationList = []
         self.minAnnotationList = []
         self.maxAnnotationList = []
+        self.regionAnnotationList = collections.deque()
 
         # Keep track of additional plots
         self.lower_plot = None
@@ -238,6 +240,23 @@ class MEPAppController(object):
             self.ui.graphicsView.removeItem(self.lower_plot)
             self.lower_plot = None
 
+    def cspShowWindowChanged(self):
+        if self.ui.csp_show_csp_window_checkbox.isChecked():
+            for trigger_time, csptuple in self.signal_logic.trigger_dict.items():
+                lr = pg.LinearRegionItem([csptuple.windowBeginTime, csptuple.windowEndTime])
+                lr.setZValue(-10)
+                self.regionAnnotationList.append(lr)
+                self.emgplot.addItem(lr)
+        else:
+            while True:
+                try:
+                    self.emgplot.removeItem(self.regionAnnotationList.pop())
+                except IndexError:
+                    break
+
+
+
+
     def startApp(self):
         self.app = emg.gui.QtGui.QApplication(sys.argv)
         self.MainWindow = emg.gui.QtGui.QMainWindow()
@@ -264,6 +283,7 @@ class MEPAppController(object):
         self.ui.csp_response_window_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.ui.csp_trigger_threshold_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.ui.csp_duration_vs_time_checkbox.stateChanged.connect(self.cspLowerPlotChanged)
+        self.ui.csp_show_csp_window_checkbox.stateChanged.connect(self.cspShowWindowChanged)
         self.emgplot = self.ui.graphicsView.addPlot(title="EMG Signal")
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
         self.ui.dockWidget.setMinimumWidth(220)

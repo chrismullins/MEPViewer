@@ -200,7 +200,14 @@
         <string>Cortical Silent Period Parameters</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="1">
+        <item row="5" column="0" colspan="2">
+         <widget class="QCheckBox" name="csp_duration_vs_time_checkbox">
+          <property name="text">
+           <string>Show CSP Duration vs Time Plot</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
          <widget class="QDoubleSpinBox" name="csp_csp_threshold_spinbox">
           <property name="singleStep">
            <double>0.010000000000000</double>
@@ -210,14 +217,14 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_14">
-          <property name="text">
-           <string>CSP Threshold</string>
+        <item row="3" column="1">
+         <widget class="QDoubleSpinBox" name="csp_response_delay_spinbox">
+          <property name="singleStep">
+           <double>0.100000000000000</double>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="2" column="1">
          <widget class="QDoubleSpinBox" name="csp_trigger_threshold_spinbox">
           <property name="singleStep">
            <double>0.100000000000000</double>
@@ -227,14 +234,14 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QDoubleSpinBox" name="csp_response_delay_spinbox">
-          <property name="singleStep">
-           <double>0.100000000000000</double>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>CSP Threshold</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
+        <item row="4" column="1">
          <widget class="QDoubleSpinBox" name="csp_response_window_spinbox">
           <property name="singleStep">
            <double>0.100000000000000</double>
@@ -244,31 +251,31 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_12">
-          <property name="text">
-           <string>Trigger Threshold:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
+        <item row="3" column="0">
          <widget class="QLabel" name="label_4">
           <property name="text">
            <string>Response Delay (s):</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
+        <item row="4" column="0">
          <widget class="QLabel" name="label_13">
           <property name="text">
            <string>Response Window (s):</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="0" colspan="2">
-         <widget class="QCheckBox" name="csp_duration_vs_time_checkbox">
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_12">
           <property name="text">
-           <string>Show CSP Duration vs Time Plot</string>
+           <string>Trigger Threshold:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="csp_show_csp_window_checkbox">
+          <property name="text">
+           <string>Show CSP Window</string>
           </property>
          </widget>
         </item>
