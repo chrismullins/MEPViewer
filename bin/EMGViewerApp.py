@@ -105,7 +105,7 @@ class MEPAppController(object):
     def placeUpArrow(self, x_pos, y_pos):
         """ Place a single unfilled upward arrow on the plot.
         """
-        minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        minItem = pg.ArrowItem(angle=90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=(0,200,0), pen='w')
         minItem.setPos(x_pos, y_pos)
         self.minAnnotationList.append(minItem)
         self.emgplot.addItem(minItem)
@@ -114,7 +114,7 @@ class MEPAppController(object):
     def placeDownArrow(self, x_pos, y_pos):
         """ Place a single unfilled upward arrow on the plot.
         """
-        maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=None)
+        maxItem = pg.ArrowItem(angle=-90, tipAngle=30, baseAngle=20, headLen=40, tailLen=None, brush=(0,200,0), pen='w')
         maxItem.setPos(x_pos, y_pos)
         self.maxAnnotationList.append(maxItem)
         self.emgplot.addItem(maxItem)
