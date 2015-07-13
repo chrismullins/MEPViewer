@@ -12,7 +12,7 @@ class CSPLogic(object):
         self.emg_signal = emg_signal
         self.timesteps = self.createTimeStepsArray(emg_signal)
         self.emg_signal_deriv = np.diff(emg_signal)
-        self.CSPTuple = collections.namedtuple('CSPTuple', 'cspStartTime cspStartValue cspEndTime cspEndValue')
+        self.CSPTuple = collections.namedtuple('CSPTuple', 'cspStartTime cspStartValue cspEndTime cspEndValue windowBeginTime windowEndTime')
         self.trigger_dict = dict()
         self.updateParameters(window_begin, window_end, trigger_threshold, csp_threshold)
 
@@ -69,12 +69,14 @@ class CSPLogic(object):
         run_ends, = np.where(difs < 0)
         run_lengths = run_ends - run_starts
         longest_run_index = np.argmax(run_lengths)
-        absolute_start_index = trigger_index+run_starts[longest_run_index]
-        absolute_end_index = trigger_index+run_ends[longest_run_index]
+        absolute_start_index = window_start_index+run_starts[longest_run_index]
+        absolute_end_index = window_start_index+run_ends[longest_run_index]
         triggerTuple = self.CSPTuple(cspStartTime=self.timesteps[absolute_start_index], \
                                      cspStartValue=self.emg_signal[absolute_start_index], \
                                      cspEndTime=self.timesteps[absolute_end_index], \
-                                     cspEndValue=self.emg_signal[absolute_end_index])
+                                     cspEndValue=self.emg_signal[absolute_end_index], \
+                                     windowBeginTime=self.timesteps[window_start_index], \
+                                     windowEndTime=self.timesteps[window_stop_index])
         return triggerTuple
 
     def writeInfoToCSV(self, outputPath):
