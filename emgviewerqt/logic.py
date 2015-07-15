@@ -17,7 +17,7 @@ class EMGLogic(object):
         self.paired_pulse = paired_pulse
         self.pp_interval = pp_interval
         self.timesteps = self.createTimeStepsArray(emg_signal)
-        self.MinMaxTuple = collections.namedtuple('MinMaxTuple', 'minTime minValue maxTime maxValue')
+        self.MinMaxTuple = collections.namedtuple('MinMaxTuple', 'minTime minValue maxTime maxValue peak2peak')
         self.updateParameters(window_begin, window_end, trigger_threshold)
 
     def updateParameters(self, begin, end, threshold):
@@ -67,10 +67,17 @@ class EMGLogic(object):
         window_min = window[min_index]
         final_min_index = window_start_index+min_index
         final_max_index = window_start_index+max_index
-        triggerTuple = self.MinMaxTuple(minTime=self.timesteps[final_min_index], \
-                                   minValue=self.emg_signal[final_min_index], \
-                                   maxTime=self.timesteps[final_max_index], \
-                                   maxValue=self.emg_signal[final_max_index])
+        # Prepare return values
+        minTime=self.timesteps[final_min_index]
+        minValue=self.emg_signal[final_min_index]
+        maxTime=self.timesteps[final_max_index]
+        maxValue=self.emg_signal[final_max_index]
+        peak2peak = abs(maxValue) + abs(minValue)
+        triggerTuple = self.MinMaxTuple(minTime=minTime, \
+                                   minValue=minValue, \
+                                   maxTime=maxTime, \
+                                   maxValue=maxValue, \
+                                   peak2peak=peak2peak)
         return triggerTuple
 
     def addTriggerTimepoint(self, trigger_time):

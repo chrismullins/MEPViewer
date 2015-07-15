@@ -76,19 +76,27 @@ class MEPAppController(object):
             self.minAnnotationList = []
             self.maxAnnotationLst = []
         if self.ui.comboBox.currentText() == "PAS" or self.ui.comboBox.currentText() == "Paired Pulse":
+            trigger_times = []
+            peak2peaks = []
             for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
                 self.placeTriggerArrow(trigger_time)
                 self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
+                trigger_times.append(trigger_time)
+                peak2peaks.append(minmaxtuple.peak2peak)
                 self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
+            if self.lower_plot:
+                self.lower_plot.plot(self.signal_logic.getTriggerTimePoints(), \
+                    self.signal_logic.getTriggerP2Ps(), \
+                    pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
         elif self.ui.comboBox.currentText() == "Cortical Silent Period":
             for trigger_time, csptuple in self.signal_logic.trigger_dict.items():
                 self.placeTriggerArrow(trigger_time)
                 self.placeUpArrow(csptuple.cspStartTime, csptuple.cspStartValue)
                 self.placeDownArrow(csptuple.cspEndTime, csptuple.cspEndValue)
-                if self.lower_plot:
-                    trigger_times = self.signal_logic.getTriggerTimePoints()
-                    csp_durations = self.signal_logic.getCSPDurations()
-                    self.lower_plot.plot(trigger_times, csp_durations, pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+            if self.lower_plot:
+                self.lower_plot.plot(self.signal_logic.getTriggerTimePoints(), \
+                    self.signal_logic.getCSPDurations(), \
+                    pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
 
         self.annotated = True
 
@@ -229,13 +237,12 @@ class MEPAppController(object):
             print("Annotate first, then save it out!")
         return
 
-    def addNewPlot(self):
-        self.ui.graphicsView.addPlot(title="NEWPLOT")
-
     def cspLowerPlotChanged(self):
         if self.ui.csp_duration_vs_time_checkbox.isChecked():
             self.ui.graphicsView.nextRow()
-            self.lower_plot = self.ui.graphicsView.addPlot(title="CSP Duration vs Time")
+            self.lower_plot = self.ui.graphicsView.addPlot(title="CSP Duration vs Trigger Time")
+            self.lower_plot.setLabel('left', "Silent Period Duration", units='s')
+            self.lower_plot.setLabel('bottom', "Time", units='s')
         else:
             self.ui.graphicsView.removeItem(self.lower_plot)
             self.lower_plot = None
@@ -253,6 +260,17 @@ class MEPAppController(object):
                     self.emgplot.removeItem(self.regionAnnotationList.pop())
                 except IndexError:
                     break
+
+    def pasShowMEPAmpChanged(self):
+        if self.ui.pas_show_mep_amplitude_checkbox.isChecked():
+            self.ui.graphicsView.nextRow()
+            self.lower_plot = self.ui.graphicsView.addPlot(title="MEP Amplitude vs Trigger Time")
+            self.lower_plot.setLabel('left', "MEP Amplitude", units='mV')
+            self.lower_plot.setLabel('bottom', "Time", units='s')
+        else:
+            self.ui.graphicsView.removeItem(self.lower_plot)
+            self.lower_plot = None
+
 
 
 
@@ -278,12 +296,14 @@ class MEPAppController(object):
         self.ui.pas_response_delay_spinbox.valueChanged.connect(self.pasParametersChanged)
         self.ui.pas_response_window_spinbox.valueChanged.connect(self.pasParametersChanged)
         self.ui.pas_trigger_threshold_spinbox.valueChanged.connect(self.pasParametersChanged)
+        self.ui.pas_show_mep_amplitude_checkbox.stateChanged.connect(self.pasShowMEPAmpChanged)
         self.ui.csp_csp_threshold_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.ui.csp_response_delay_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.ui.csp_response_window_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.ui.csp_trigger_threshold_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.ui.csp_duration_vs_time_checkbox.stateChanged.connect(self.cspLowerPlotChanged)
         self.ui.csp_show_csp_window_checkbox.stateChanged.connect(self.cspShowWindowChanged)
+        self.ui.command_annotate_button.clicked.connect(self.autoAnnotateSignal)
         self.emgplot = self.ui.graphicsView.addPlot(title="EMG Signal")
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
         self.ui.dockWidget.setMinimumWidth(220)
