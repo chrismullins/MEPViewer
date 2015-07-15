@@ -16,16 +16,6 @@ os.environ["PATH"] + \
 os.path.pathsep + os.path.split(zmq.__file__)[0]
 
 import neo
-#import matplotlib
-# from distutils.filelist import findall
-# import matplotlib
-# matplotlibdatadir = matplotlib.get_data_path()
-# matplotlibdata = findall(matplotlibdatadir)
-# matplotlibdata_files = []
-# for f in matplotlibdata:
-#     dirname = os.path.join('matplotlibdata', f[len(matplotlibdatadir)+1:])
-#     matplotlibdata_files.append((os.path.split(dirname)[0], [f]))
-# data_files = matplotlibdata_files
 
 opts = {
     'py2exe': { "includes": 
@@ -34,7 +24,7 @@ opts = {
                                "matplotlib.backends.backend_tkagg", "zmq.utils", "zmq.utils.jsonapi", "zmq.utils.strtypes"],
                 'excludes': 
                             ['_gtkagg', '_tkagg', '_agg2', '_cairo', '_cocoaagg',
-                             '_fltkagg', '_gtk', '_gtkcairo', ],
+                             '_fltkagg', '_gtk', '_gtkcairo', 'scipy', 'PIL'],
                 'dll_excludes': 
                             ['libgdk-win32-2.0-0.dll',
                                  'libgobject-2.0-0.dll']
@@ -52,7 +42,7 @@ data_files = [(r'mpl-data', glob(r'C:\Python27\Lib\site-packages\matplotlib\mpl-
                    (r'mpl-data\fonts',glob(r'C:\Python27\Lib\site-packages\matplotlib\mpl-data\fonts\*.*'))]
 
 
-#data_files = [("Microsoft.VC90.CRT", glob(r'C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*'))]
+data_files.extend([("Microsoft.VC90.CRT", glob(r'C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*'))])
 #print type(data_files)
 #exit()
 #data_files.append(matplotlib.get_py2exe_datafiles())
