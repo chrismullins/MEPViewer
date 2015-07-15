@@ -70,7 +70,8 @@ class CSPLogic(object):
         run_lengths = run_ends - run_starts
         longest_run_index = np.argmax(run_lengths)
         absolute_start_index = window_start_index+run_starts[longest_run_index]
-        absolute_end_index = window_start_index+run_ends[longest_run_index]
+        # Subtract one to account for the padding.
+        absolute_end_index = window_start_index+run_ends[longest_run_index]-1
         triggerTuple = self.CSPTuple(cspStartTime=self.timesteps[absolute_start_index], \
                                      cspStartValue=self.emg_signal[absolute_start_index], \
                                      cspEndTime=self.timesteps[absolute_end_index], \
