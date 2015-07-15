@@ -190,19 +190,39 @@ class MEPAppController(object):
                 window_begin=self.ui.pas_response_delay_spinbox.value(), \
                 window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
                 paired_pulse=False)
+            self.setPASParameters(True)
+            self.setCSPParameters(False)
         elif self.ui.comboBox.currentText() == "Paired Pulse":
             self.signal_logic = emg.EMGLogic.EMGLogic(emg_signal=self.emg_signal, \
                 trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
                 window_begin=self.ui.pas_response_delay_spinbox.value(), \
                 window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
                 paired_pulse=True)
+            self.setPASParameters(True)
+            self.setCSPParameters(False)
         elif self.ui.comboBox.currentText() == "Cortical Silent Period":
             self.signal_logic = emg.CSPLogic.CSPLogic(emg_signal=self.emg_signal, \
                 trigger_threshold=self.ui.csp_trigger_threshold_spinbox.value(), \
                 window_begin=self.ui.csp_response_delay_spinbox.value(), \
                 window_end=self.ui.csp_response_delay_spinbox.value() + self.ui.csp_response_window_spinbox.value(), \
                 csp_threshold=self.ui.csp_csp_threshold_spinbox.value())
+            self.setPASParameters(False)
+            self.setCSPParameters(True)
         return
+
+    def setCSPParameters(self, enabled):
+        self.ui.csp_show_csp_window_checkbox.setEnabled(enabled)
+        self.ui.csp_csp_threshold_spinbox.setEnabled(enabled)
+        self.ui.csp_trigger_threshold_spinbox.setEnabled(enabled)
+        self.ui.csp_response_delay_spinbox.setEnabled(enabled)
+        self.ui.csp_response_window_spinbox.setEnabled(enabled)
+        self.ui.csp_duration_vs_time_checkbox.setEnabled(enabled)
+
+    def setPASParameters(self, enabled):
+        self.ui.pas_trigger_threshold_spinbox.setEnabled(enabled)
+        self.ui.pas_response_delay_spinbox.setEnabled(enabled)
+        self.ui.pas_response_window_spinbox.setEnabled(enabled)
+        self.ui.pas_show_mep_amplitude_checkbox.setEnabled(enabled)
 
 
     def pasParametersChanged(self):
@@ -304,6 +324,7 @@ class MEPAppController(object):
         self.ui.csp_duration_vs_time_checkbox.stateChanged.connect(self.cspLowerPlotChanged)
         self.ui.csp_show_csp_window_checkbox.stateChanged.connect(self.cspShowWindowChanged)
         self.ui.command_annotate_button.clicked.connect(self.autoAnnotateSignal)
+        self.setCSPParameters(False)
         self.emgplot = self.ui.graphicsView.addPlot(title="EMG Signal")
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
         self.ui.dockWidget.setMinimumWidth(220)
