@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\P\MEPApp\Qt\ECGViewerQt\Resources\EMGViewerGUI.ui'
 #
-# Created: Wed Jul 15 09:57:22 2015
+# Created: Thu Jul 16 13:32:54 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -58,7 +58,7 @@ class Ui_MainWindow(object):
         self.gridLayout_3 = QtGui.QGridLayout(self.dockWidgetContents)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.gridLayout_3.addItem(spacerItem, 4, 0, 1, 1)
+        self.gridLayout_3.addItem(spacerItem, 5, 0, 1, 1)
         self.gridLayout_2 = QtGui.QGridLayout()
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.label_2 = QtGui.QLabel(self.dockWidgetContents)
@@ -77,7 +77,7 @@ class Ui_MainWindow(object):
         self.lineEdit.setReadOnly(True)
         self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
         self.gridLayout_2.addWidget(self.lineEdit, 1, 1, 1, 1)
-        self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout_2, 1, 0, 1, 1)
         self.groupBox = QtGui.QGroupBox(self.dockWidgetContents)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.gridLayout_6 = QtGui.QGridLayout(self.groupBox)
@@ -99,6 +99,7 @@ class Ui_MainWindow(object):
         self.pas_response_delay_spinbox.setObjectName(_fromUtf8("pas_response_delay_spinbox"))
         self.gridLayout_6.addWidget(self.pas_response_delay_spinbox, 1, 1, 1, 1)
         self.pas_trigger_threshold_spinbox = QtGui.QDoubleSpinBox(self.groupBox)
+        self.pas_trigger_threshold_spinbox.setEnabled(True)
         self.pas_trigger_threshold_spinbox.setSingleStep(0.1)
         self.pas_trigger_threshold_spinbox.setProperty("value", 1.0)
         self.pas_trigger_threshold_spinbox.setObjectName(_fromUtf8("pas_trigger_threshold_spinbox"))
@@ -109,7 +110,7 @@ class Ui_MainWindow(object):
         self.pas_show_mep_amplitude_checkbox = QtGui.QCheckBox(self.groupBox)
         self.pas_show_mep_amplitude_checkbox.setObjectName(_fromUtf8("pas_show_mep_amplitude_checkbox"))
         self.gridLayout_6.addWidget(self.pas_show_mep_amplitude_checkbox, 3, 0, 1, 1)
-        self.gridLayout_3.addWidget(self.groupBox, 1, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.groupBox, 2, 0, 1, 1)
         self.groupBox_2 = QtGui.QGroupBox(self.dockWidgetContents)
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.gridLayout_4 = QtGui.QGridLayout(self.groupBox_2)
@@ -151,10 +152,16 @@ class Ui_MainWindow(object):
         self.csp_show_csp_window_checkbox = QtGui.QCheckBox(self.groupBox_2)
         self.csp_show_csp_window_checkbox.setObjectName(_fromUtf8("csp_show_csp_window_checkbox"))
         self.gridLayout_4.addWidget(self.csp_show_csp_window_checkbox, 0, 0, 1, 1)
-        self.gridLayout_3.addWidget(self.groupBox_2, 2, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.groupBox_2, 3, 0, 1, 1)
         self.command_annotate_button = QtGui.QCommandLinkButton(self.dockWidgetContents)
         self.command_annotate_button.setObjectName(_fromUtf8("command_annotate_button"))
-        self.gridLayout_3.addWidget(self.command_annotate_button, 3, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.command_annotate_button, 4, 0, 1, 1)
+        self.label_3 = QtGui.QLabel(self.dockWidgetContents)
+        self.label_3.setText(_fromUtf8(""))
+        self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8(":/images/ActionPotential.png")))
+        self.label_3.setScaledContents(True)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.gridLayout_3.addWidget(self.label_3, 0, 0, 1, 1)
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget)
         self.actionLoad = QtGui.QAction(MainWindow)
@@ -217,6 +224,7 @@ class Ui_MainWindow(object):
         self.actionManually_Add_Trigger.setText(_translate("MainWindow", "Manually Add Trigger", None))
 
 from pyqtgraph import GraphicsLayoutWidget
+import ui_resource_rc
 
 if __name__ == "__main__":
     import sys
