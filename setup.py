@@ -20,11 +20,11 @@ import neo
 opts = {
     'py2exe': { "includes": 
                             ["sip", "PyQt4", "matplotlib.backends",  "matplotlib.backends.backend_qt4agg",
-                               "matplotlib.figure","pylab", "numpy",
-                               "matplotlib.backends.backend_tkagg", "zmq.utils", "zmq.utils.jsonapi", "zmq.utils.strtypes"],
+                               "pylab", "numpy",
+                               "zmq.utils", "zmq.utils.jsonapi", "zmq.utils.strtypes"],
                 'excludes': 
                             ['_gtkagg', '_tkagg', '_agg2', '_cairo', '_cocoaagg',
-                             '_fltkagg', '_gtk', '_gtkcairo', 'scipy', 'PIL'],
+                             '_fltkagg', '_gtk', '_gtkcairo', 'scipy', 'PIL', 'tornado', 'sodium'],
                 'dll_excludes': 
                             ['libgdk-win32-2.0-0.dll',
                                  'libgobject-2.0-0.dll']
