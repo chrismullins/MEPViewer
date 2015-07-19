@@ -97,6 +97,27 @@ class MEPAppController(object):
                 self.lower_plot.plot(self.signal_logic.getTriggerTimePoints(), \
                     self.signal_logic.getCSPDurations(), \
                     pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+        elif self.ui.comboBox.currentText() == "Recruitment Curve":
+            trigger_times = []
+            peak2peaks = []
+            for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
+                self.placeTriggerArrow(trigger_time)
+                self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
+                trigger_times.append(trigger_time)
+                peak2peaks.append(minmaxtuple.peak2peak)
+                self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
+            if self.lower_plot:
+                intensity_arr, means_arr, stddev_arr = self.signal_logic.getMeanMEPReadings()
+                self.lower_plot.plot(intensity_arr, means_arr, \
+                    pen=None, symbolBrush=(255,0,0), symbolPen='w')
+                    #pen=None, symbol='t', symbolPen=None, symbolSize=10, symbolBrush=(100, 100, 255, 50))
+                    #pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+                err = pg.ErrorBarItem(x=intensity_arr,y=means_arr, top=stddev_arr, bottom=stddev_arr, beam=0.5)
+                self.lower_plot.addItem(err)
+                # plot sigmoid
+                sig_x, sig_y = self.signal_logic.getSigmoidFit()
+                self.lower_plot.plot(sig_x, sig_y)
+
 
         self.annotated = True
 
@@ -208,6 +229,13 @@ class MEPAppController(object):
                 csp_threshold=self.ui.csp_csp_threshold_spinbox.value())
             self.setPASParameters(False)
             self.setCSPParameters(True)
+        elif self.ui.comboBox.currentText() == "Recruitment Curve":
+            self.signal_logic = emg.RCLogic.RCLogic(emg_signal=self.emg_signal, \
+                fid=self.currentFile)
+                # trigger_threshold=self.ui.rc_trigger_threshold_spinbox.value(), \
+                # window_begin=self.ui.rc_response_delay_spinbox.value(), \
+                # window_end=self.ui.rc_response_delay_spinbox.value() + self.ui.rc_response_window_spinbox.value(), \
+                # )
         return
 
     def setCSPParameters(self, enabled):
@@ -298,6 +326,8 @@ class MEPAppController(object):
     def startApp(self):
         self.app = emg.gui.QtGui.QApplication(sys.argv)
         self.MainWindow = emg.gui.QtGui.QMainWindow()
+        # Enable antialiasing for prettier plots
+        pg.setConfigOptions(antialias=True)
         self.ui = emg.gui.Ui_MainWindow()
         self.ui.setupUi(self.MainWindow)
         self.ui.actionExit.triggered.connect(self.app.quit)

@@ -112,6 +112,11 @@
          </item>
          <item>
           <property name="text">
+           <string>Recruitment Curve</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>Paired Pulse</string>
           </property>
          </item>

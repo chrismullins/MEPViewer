@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\P\MEPApp\Qt\ECGViewerQt\Resources\EMGViewerGUI.ui'
 #
-# Created: Wed Jul 15 09:57:22 2015
+# Created: Sat Jul 18 15:48:21 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -69,6 +69,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.label, 0, 0, 1, 1)
         self.comboBox = QtGui.QComboBox(self.dockWidgetContents)
         self.comboBox.setObjectName(_fromUtf8("comboBox"))
+        self.comboBox.addItem(_fromUtf8(""))
         self.comboBox.addItem(_fromUtf8(""))
         self.comboBox.addItem(_fromUtf8(""))
         self.comboBox.addItem(_fromUtf8(""))
@@ -193,8 +194,9 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "Current File:", None))
         self.label.setText(_translate("MainWindow", "Mode: ", None))
         self.comboBox.setItemText(0, _translate("MainWindow", "PAS", None))
-        self.comboBox.setItemText(1, _translate("MainWindow", "Paired Pulse", None))
-        self.comboBox.setItemText(2, _translate("MainWindow", "Cortical Silent Period", None))
+        self.comboBox.setItemText(1, _translate("MainWindow", "Recruitment Curve", None))
+        self.comboBox.setItemText(2, _translate("MainWindow", "Paired Pulse", None))
+        self.comboBox.setItemText(3, _translate("MainWindow", "Cortical Silent Period", None))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "Load a .smr file.", None))
         self.groupBox.setTitle(_translate("MainWindow", "PAS/Paired Pulse Parameters", None))
         self.label_6.setText(_translate("MainWindow", "Trigger Threshold:", None))
