@@ -137,14 +137,6 @@ class RCLogic(object):
         def residuals(p,x,y):
             return y - sigmoid(p,x)
 
-        # def resize(arr,lower=0.0,upper=1.0):
-        #     arr=arr.copy()
-        #     if lower>upper: lower,upper=upper,lower
-        #     arr -= arr.min()
-        #     arr *= (upper-lower)/arr.max()
-        #     arr += lower
-        #     return arr
-
         x, y, stddev = self.getMeanMEPReadings()
 
         p_guess=(np.median(x),np.median(y),1.0,1.0)
@@ -164,6 +156,35 @@ class RCLogic(object):
         max_slope /= np.diff(xp)[np.argmax(max_slope)]
         print("Max slope: {}".format(max_slope))
         return xp, pxp
+
+    def writeInfoToCSV(self, outputPath):
+        intensities = sorted(list(set(self.stim_order)))
+        mep_dict = collections.defaultdict(list)
+        # dict mapping intensities to a list of MEPs at that intensity
+        for ttime, mmtup in self.trigger_dict.iteritems():
+            mep_dict[mmtup.intensity].append(mmtup.peak2peak)
+        footerList = []
+        for intensity, p2plist in mep_dict.iteritems():
+            p2ps = "\n".join(str(p2p) for p2p in p2plist)
+            average = str(np.mean(np.array(p2plist)))
+            averge_str = "Average: {}".format(average)
+            intro = "Intensity: {}".format(intensity)
+            footerList.append("\n".join((intro, p2ps, average_str)))
+
+        np.savetxt(outputPath, \
+            np.vstack([
+            np.hstack(arr.reshape(-1,1) for arr in \
+                [self.getTriggerTimePoints(), \
+                 self.getTriggerMinTimes(), \
+                 self.getTriggerMins(), \
+                 self.getTriggerMaxTimes(), \
+                 self.getTriggerMaxs(), \
+                 self.getTriggerMeans(), \
+                 self.getIntensities(), \
+                 self.getTriggerP2Ps()])]), \
+            header="trigger,min_time,min_value,max_time,max_value,mean,intensity,peak2peak", delimiter=",", \
+            footer="\n".join(footerList), \
+            fmt="%.5e")
 
 
 
@@ -190,3 +211,6 @@ class RCLogic(object):
 
     def getFinalAverage(self):
         return np.mean(self.getTriggerP2Ps())
+
+    def getIntensities(self):
+        return np.array([self.trigger_dict[trigger_time].intensity for trigger_time in sorted(self.trigger_dict)])
