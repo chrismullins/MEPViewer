@@ -70,7 +70,6 @@ class RCLogic(object):
         trigger_indices = self.findTriggerIndices(self.emg_signal_deriv, self.trigger_threshold)
         for i, index in enumerate(trigger_indices):
             self.trigger_dict[self.timesteps[index]] = self.findResponseMinMaxs(index, self.stim_order[i])
-            #elf.trigger_dict[self.timesteps[index]].intensity = self.stim_order[i]
 
     
     def findTriggerIndices(self, signal_deriv, threshold):
@@ -82,7 +81,6 @@ class RCLogic(object):
         # Trigger waiting period: for paired pulse data there are two triggers within 30ms of eachother.
         # Skip ahead the corresponding number of samples to avoid tagging both triggers. Non-pp data
         # doesn't have close-together triggers so we can do this safely for both.
-        #if self.paired_pulse:
         trigger_waiting_period = int(0.03*self.emg_signal.sampling_rate)
         # Quick way to find which triggers are close together
         secondary_triggers_indices, = np.where(abs(np.diff(trigger_list)) < trigger_waiting_period)

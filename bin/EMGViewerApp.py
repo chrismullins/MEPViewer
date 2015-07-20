@@ -110,8 +110,6 @@ class MEPAppController(object):
                 intensity_arr, means_arr, stddev_arr = self.signal_logic.getMeanMEPReadings()
                 self.lower_plot.plot(intensity_arr, means_arr, \
                     pen=None, symbolBrush=(255,0,0), symbolPen='w')
-                    #pen=None, symbol='t', symbolPen=None, symbolSize=10, symbolBrush=(100, 100, 255, 50))
-                    #pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
                 err = pg.ErrorBarItem(x=intensity_arr,y=means_arr, top=stddev_arr, bottom=stddev_arr, beam=0.5)
                 self.lower_plot.addItem(err)
                 # plot sigmoid
