@@ -50,13 +50,15 @@ class RCLogic(object):
         self.timesteps = self.createTimeStepsArray(emg_signal)
         self.stim_order = self.readIntensityFromHeader(self.filename)
         self.MinMaxTuple = collections.namedtuple('MinMaxTuple', 'minTime minValue maxTime maxValue intensity peak2peak')
-        self.updateParameters(window_begin, window_end, trigger_threshold)
+        if fid:
+            self.updateParameters(window_begin, window_end, trigger_threshold, filename=fid)
 
-    def updateParameters(self, begin, end, threshold):
+    def updateParameters(self, begin, end, threshold, filename):
         self.trigger_dict = dict()
         self.window_begin = begin
         self.window_end = end
         self.trigger_threshold = threshold
+        self.fid = filename
         self.response_window_time = np.array([self.window_begin,self.window_end])
         self.response_window_indices = self.response_window_time*self.emg_signal.sampling_rate
         self.fillTriggerDict()
@@ -158,6 +160,9 @@ class RCLogic(object):
 
         xp = np.linspace(np.array(self.stim_order).min(), np.array(self.stim_order).max(), 1500)
         pxp=sigmoid(p,xp)
+        max_slope = np.diff(pxp).max()
+        max_slope /= np.diff(xp)[np.argmax(max_slope)]
+        print("Max slope: {}".format(max_slope))
         return xp, pxp
 
 
