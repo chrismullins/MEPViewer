@@ -97,6 +97,25 @@ class MEPAppController(object):
                 self.lower_plot.plot(self.signal_logic.getTriggerTimePoints(), \
                     self.signal_logic.getCSPDurations(), \
                     pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+        elif self.ui.comboBox.currentText() == "Recruitment Curve":
+            trigger_times = []
+            peak2peaks = []
+            for trigger_time, minmaxtuple in self.signal_logic.trigger_dict.items():
+                self.placeTriggerArrow(trigger_time)
+                self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
+                trigger_times.append(trigger_time)
+                peak2peaks.append(minmaxtuple.peak2peak)
+                self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
+            if self.lower_plot:
+                intensity_arr, means_arr, stddev_arr = self.signal_logic.getMeanMEPReadings()
+                self.lower_plot.plot(intensity_arr, means_arr, \
+                    pen=None, symbolBrush=(255,0,0), symbolPen='w')
+                err = pg.ErrorBarItem(x=intensity_arr,y=means_arr, top=stddev_arr, bottom=stddev_arr, beam=0.5)
+                self.lower_plot.addItem(err)
+                # plot sigmoid
+                sig_x, sig_y = self.signal_logic.getSigmoidFit()
+                self.lower_plot.plot(sig_x, sig_y)
+
 
         self.annotated = True
 
@@ -184,6 +203,9 @@ class MEPAppController(object):
             self.setSignalLogicMode()
 
     def setSignalLogicMode(self):
+        self.setPASParameters(False)
+        self.setCSPParameters(False)
+        self.setRCParameters(False)
         if self.ui.comboBox.currentText() == "PAS":
             self.signal_logic = emg.EMGLogic.EMGLogic(emg_signal=self.emg_signal, \
                 trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
@@ -191,7 +213,6 @@ class MEPAppController(object):
                 window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
                 paired_pulse=False)
             self.setPASParameters(True)
-            self.setCSPParameters(False)
         elif self.ui.comboBox.currentText() == "Paired Pulse":
             self.signal_logic = emg.EMGLogic.EMGLogic(emg_signal=self.emg_signal, \
                 trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
@@ -199,15 +220,20 @@ class MEPAppController(object):
                 window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
                 paired_pulse=True)
             self.setPASParameters(True)
-            self.setCSPParameters(False)
         elif self.ui.comboBox.currentText() == "Cortical Silent Period":
             self.signal_logic = emg.CSPLogic.CSPLogic(emg_signal=self.emg_signal, \
                 trigger_threshold=self.ui.csp_trigger_threshold_spinbox.value(), \
                 window_begin=self.ui.csp_response_delay_spinbox.value(), \
                 window_end=self.ui.csp_response_delay_spinbox.value() + self.ui.csp_response_window_spinbox.value(), \
                 csp_threshold=self.ui.csp_csp_threshold_spinbox.value())
-            self.setPASParameters(False)
             self.setCSPParameters(True)
+        elif self.ui.comboBox.currentText() == "Recruitment Curve":
+            self.signal_logic = emg.RCLogic.RCLogic(emg_signal=self.emg_signal, \
+                trigger_threshold=self.ui.rc_trigger_threshold_spinbox.value(), \
+                window_begin=self.ui.rc_response_delay_spinbox.value(), \
+                window_end=self.ui.rc_response_delay_spinbox.value() + self.ui.rc_response_window_spinbox.value(), \
+                fid=self.currentFile)
+            self.setRCParameters(True)
         return
 
     def setCSPParameters(self, enabled):
@@ -223,6 +249,12 @@ class MEPAppController(object):
         self.ui.pas_response_delay_spinbox.setEnabled(enabled)
         self.ui.pas_response_window_spinbox.setEnabled(enabled)
         self.ui.pas_show_mep_amplitude_checkbox.setEnabled(enabled)
+
+    def setRCParameters(self, enabled):
+        self.ui.rc_trigger_threshold_spinbox.setEnabled(enabled)
+        self.ui.rc_response_delay_spinbox.setEnabled(enabled)
+        self.ui.rc_response_window_spinbox.setEnabled(enabled)
+        self.ui.rc_show_rc_checkbox.setEnabled(enabled)
 
 
     def pasParametersChanged(self):
@@ -242,6 +274,14 @@ class MEPAppController(object):
             begin=self.ui.csp_response_delay_spinbox.value(), \
             end=self.ui.csp_response_delay_spinbox.value() + self.ui.csp_response_window_spinbox.value(), \
             csp_threshold=self.ui.csp_csp_threshold_spinbox.value())
+
+    def rcParametersChanged(self):
+        """ Let the signal_logic update its internal dict of triggers and associated parameters.
+        """
+        self.signal_logic.updateParameters(trigger_threshold=self.ui.rc_trigger_threshold_spinbox.value(), \
+            begin=self.ui.rc_response_delay_spinbox.value(), \
+            end=self.ui.rc_response_delay_spinbox.value() + self.ui.rc_response_window_spinbox.value(), \
+            filename=self.currentFile)
 
 
     def writeToCSV(self):
@@ -281,6 +321,16 @@ class MEPAppController(object):
                 except IndexError:
                     break
 
+    def rcShowRCFitChanged(self):
+        if self.ui.rc_show_rc_checkbox.isChecked():
+            self.ui.graphicsView.nextRow()
+            self.lower_plot = self.ui.graphicsView.addPlot(title="Recruitment Curve: Average MEP Amplitude vs Intensity")
+            self.lower_plot.setLabel('left', "Average MEP Amplitude", units='mV')
+            self.lower_plot.setLabel('bottom', "Trigger Intensity", units='\%\ of machine output')
+        else:
+            self.ui.graphicsView.removeItem(self.lower_plot)
+            self.lower_plot = None
+
     def pasShowMEPAmpChanged(self):
         if self.ui.pas_show_mep_amplitude_checkbox.isChecked():
             self.ui.graphicsView.nextRow()
@@ -291,13 +341,11 @@ class MEPAppController(object):
             self.ui.graphicsView.removeItem(self.lower_plot)
             self.lower_plot = None
 
-
-
-
-
     def startApp(self):
         self.app = emg.gui.QtGui.QApplication(sys.argv)
         self.MainWindow = emg.gui.QtGui.QMainWindow()
+        # Enable antialiasing for prettier plots
+        pg.setConfigOptions(antialias=True)
         self.ui = emg.gui.Ui_MainWindow()
         self.ui.setupUi(self.MainWindow)
         self.ui.actionExit.triggered.connect(self.app.quit)
@@ -323,8 +371,13 @@ class MEPAppController(object):
         self.ui.csp_trigger_threshold_spinbox.valueChanged.connect(self.cspParametersChanged)
         self.ui.csp_duration_vs_time_checkbox.stateChanged.connect(self.cspLowerPlotChanged)
         self.ui.csp_show_csp_window_checkbox.stateChanged.connect(self.cspShowWindowChanged)
+        self.ui.rc_trigger_threshold_spinbox.valueChanged.connect(self.rcParametersChanged)
+        self.ui.rc_response_delay_spinbox.valueChanged.connect(self.rcParametersChanged)
+        self.ui.rc_response_window_spinbox.valueChanged.connect(self.rcParametersChanged)
+        self.ui.rc_show_rc_checkbox.stateChanged.connect(self.rcShowRCFitChanged)
         self.ui.command_annotate_button.clicked.connect(self.autoAnnotateSignal)
         self.setCSPParameters(False)
+        self.setRCParameters(False)
         self.emgplot = self.ui.graphicsView.addPlot(title="EMG Signal")
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
         self.ui.dockWidget.setMinimumWidth(220)
