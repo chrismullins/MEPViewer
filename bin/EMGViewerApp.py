@@ -61,6 +61,9 @@ class MEPAppController(object):
         self.plotDataDict = dict()
         self.signalLogicDict = dict()
 
+        # Keep track of additional widgets
+        self.savedatadialogWidget = None
+
         self.startApp()
 
     def clearScene(self):
@@ -348,16 +351,12 @@ class MEPAppController(object):
     def writeToCSV(self):
         """ Write the data from this session to CSV.
         """
-        pass
-        # outputPath = QtGui.QFileDialog.getSaveFileName( \
-        #     directory=os.path.dirname(str(self.currentFile.name)), \
-        #     caption="Save Response as CSV"
-        #     )
-        # if self.annotated:
-        #     self.signal_logic.writeInfoToCSV(str(outputPath))
-        # else:
-        #     print("Annotate first, then save it out!")
-        # return
+        for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+            if ftuple.checkbox.isChecked():
+                outputPath = QtGui.QFileDialog.getSaveFileName( \
+             directory=os.path.dirname(str(fname)), \
+             caption="Save {} as CSV".format(os.path.basename(str(fname))))
+                self.signalLogicDict[fname].writeInfoToCSV(str(outputPath))
 
     def cspLowerPlotChanged(self):
         if self.ui.csp_duration_vs_time_checkbox.isChecked():
