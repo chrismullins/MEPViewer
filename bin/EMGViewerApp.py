@@ -32,9 +32,10 @@ class MEPAppController(object):
         self.MainWindow = None
         self.ui = None
         self.signal_logics = []
-        self.emg_signals = []
+        self.emgSignalDict = dict()
         self.emgplot = None
         self.currentFiles = []
+        self.currentFileDict = dict()
         self.additionalLineEdits = []
         self.annotated = False
         self.plotDataItems = []
@@ -52,6 +53,13 @@ class MEPAppController(object):
 
         # Keep track of additional plots
         self.lower_plot = None
+        self.signal_legend = None
+
+        # Keep track of additional files
+        self.FileWidgetTuple = collections.namedtuple('FileWidgetTuple', 'checkbox lineedit label')
+        self.fileWidgetTupleDict = dict()
+        self.plotDataDict = dict()
+        self.signalLogicDict = dict()
 
         self.startApp()
 
@@ -59,7 +67,9 @@ class MEPAppController(object):
         self.emgplot.clear()
         self.signal_logics = []
         self.emg_signals = []
+        self.emgSignalDict.clear()
         self.currentFiles = []
+        self.currentFileDict.clear()
         self.annotated = False
 
     def autoAnnotateSignal(self):
@@ -79,48 +89,49 @@ class MEPAppController(object):
         if self.ui.comboBox.currentText() == "PAS" or self.ui.comboBox.currentText() == "Paired Pulse":
             trigger_times = []
             peak2peaks = []
-            for i in range(len(self.signal_logics)):
-                for trigger_time, minmaxtuple in self.signal_logics[i].trigger_dict.items():
-                    self.placeTriggerArrow(trigger_time)
-                    self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
-                    trigger_times.append(trigger_time)
-                    peak2peaks.append(minmaxtuple.peak2peak)
-                    self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
-                if self.lower_plot:
-                    self.lower_plot.plot(self.signal_logics[i].getTriggerTimePoints(), \
-                        self.signal_logics[i].getTriggerP2Ps(), \
-                        pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+            for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+                for trigger_time, minmaxtuple in self.signalLogicDict[fname].trigger_dict.items():
+                    if ftuple.checkbox.isChecked():
+                        self.placeTriggerArrow(trigger_time)
+                        self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
+                        trigger_times.append(trigger_time)
+                        peak2peaks.append(minmaxtuple.peak2peak)
+                        self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
+                        if self.lower_plot:
+                            self.lower_plot.plot(self.signalLogicDict[fname].getTriggerTimePoints(), \
+                                self.signalLogicDict[fname].getTriggerP2Ps(), \
+                                pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
         elif self.ui.comboBox.currentText() == "Cortical Silent Period":
-            for i in len(self.signal_logics):
-                for trigger_time, csptuple in self.signal_logics[i].trigger_dict.items():
-                    self.placeTriggerArrow(trigger_time)
-                    self.placeUpArrow(csptuple.cspStartTime, csptuple.cspStartValue)
-                    self.placeDownArrow(csptuple.cspEndTime, csptuple.cspEndValue)
-                if self.lower_plot:
-                    self.lower_plot.plot(self.signal_logic.getTriggerTimePoints(), \
-                        self.signal_logics[i].getCSPDurations(), \
-                        pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+            for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+                for trigger_time, csptuple in self.signalLogicDict[fname].trigger_dict.items():
+                    if ftuple.checkbox.isChecked():
+                        self.placeTriggerArrow(trigger_time)
+                        self.placeUpArrow(csptuple.cspStartTime, csptuple.cspStartValue)
+                        self.placeDownArrow(csptuple.cspEndTime, csptuple.cspEndValue)
+                        if self.lower_plot:
+                            self.lower_plot.plot(self.signalLogicDict[fname].getTriggerTimePoints(), \
+                                self.signalLogicDict[fname].getCSPDurations(), \
+                                pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
         elif self.ui.comboBox.currentText() == "Recruitment Curve":
             trigger_times = []
             peak2peaks = []
-            for i in range(len(self.signal_logics)):
-                for trigger_time, minmaxtuple in self.signal_logics[i].trigger_dict.items():
-                    self.placeTriggerArrow(trigger_time)
-                    self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
-                    trigger_times.append(trigger_time)
-                    peak2peaks.append(minmaxtuple.peak2peak)
-                    self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
-                if self.lower_plot:
-                    intensity_arr, means_arr, stddev_arr = self.signal_logics[i].getMeanMEPReadings()
-                    self.lower_plot.plot(intensity_arr, means_arr, \
-                        pen=None, symbolBrush=(255,0,0), symbolPen='w')
-                    err = pg.ErrorBarItem(x=intensity_arr,y=means_arr, top=stddev_arr, bottom=stddev_arr, beam=0.5)
-                    self.lower_plot.addItem(err)
-                    # plot sigmoid
-                    sig_x, sig_y = self.signal_logics[i].getSigmoidFit()
-                    self.lower_plot.plot(sig_x, sig_y)
-
-
+            for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+                if ftuple.checkbox.isChecked():
+                    for trigger_time, minmaxtuple in self.signalLogicDict[fname].trigger_dict.items():
+                        self.placeTriggerArrow(trigger_time)
+                        self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
+                        trigger_times.append(trigger_time)
+                        peak2peaks.append(minmaxtuple.peak2peak)
+                        self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
+                    if self.lower_plot:
+                        intensity_arr, means_arr, stddev_arr = self.signalLogicDict[fname].getMeanMEPReadings()
+                        self.lower_plot.plot(intensity_arr, means_arr, \
+                            pen=None, symbolBrush=(255,0,0), symbolPen='w')
+                        err = pg.ErrorBarItem(x=intensity_arr, y=means_arr, top=stddev_arr, bottom=stddev_arr, beam=0.5)
+                        self.lower_plot.addItem(err)
+                        # plot sigmoid
+                        sig_x, sig_y = self.signalLogicDict[fname].getSigmoidFit()
+                        self.lower_plot.plot(sig_x,sig_y)
         self.annotated = True
 
     def placeTriggerArrow(self, trigger_time):
@@ -154,20 +165,24 @@ class MEPAppController(object):
     def fileLoadSequence(self):
         """ Load a signal from a selected file, and show the plot.
         """
-        #self.currentFile = self.showDialog()
         recentFile = self.showDialog()
-        self.currentFiles.append(recentFile)
+        self.currentFileDict[recentFile.name] = recentFile
         r = emg.SpikeReader.reader(str(recentFile.name))
-        self.emg_signals.append(r.GetEMGSignal())
-        self.createSignalLogic(emg_signal=self.emg_signals[-1])
+        self.emgSignalDict[recentFile.name] = r.GetEMGSignal()
+        self.createSignalLogic(filename=recentFile.name, emg_signal=self.emgSignalDict[recentFile.name])
         self.setSignalLogicMode()
-        self.plotDataItems.append(self.emgplot.plot(self.signal_logics[-1].timesteps, self.emg_signals[-1], pen=(255,255,255,200)))
-        if len(self.currentFiles) > 1:
-            additionalLineEdit = self.addFileLineEdit()
-            additionalLineEdit.setText(recentFile.name)
+        plotDataItem = self.emgplot.plot(self.signalLogicDict[recentFile.name].timesteps, self.emgSignalDict[recentFile.name], \
+            pen=(255,255,255,200), \
+            name=os.path.basename(str(recentFile.name)))
+        self.plotDataDict[recentFile.name] = plotDataItem
+        
+        if len(self.currentFileDict) > 1:
+            additionalLineEdit = self.addFileWidgets(fid=recentFile)
             self.additionalLineEdits.append(additionalLineEdit)
         else:
-            self.ui.lineEdit.setText(recentFile.name)
+            self.ui.fileLineEdit1.setText(recentFile.name)
+            widgetTuple = self.FileWidgetTuple(checkbox=self.ui.fileCheckbox1, lineedit=self.ui.fileLineEdit1, label=self.ui.fileLabel1)
+            self.fileWidgetTupleDict[recentFile.name] = widgetTuple
         return
 
     def addTrigger(self,ev):
@@ -211,47 +226,45 @@ class MEPAppController(object):
 
     def modeChanged(self):
         print self.ui.comboBox.currentText()
-        if len(self.currentFiles) > 0:
+        if len(self.currentFileDict) > 0:
             self.setSignalLogicMode()
 
     def setSignalLogicMode(self):
         self.setPASParameters(False)
         self.setCSPParameters(False)
         self.setRCParameters(False)
-        #for signal_logic, currentFile, emg_signal in itertools.izip(self.signal_logics, self.currentFiles, self.emg_signals):
-        #for i, signal_logic in enumerate(self.signal_logics):
-        for i in range(len(self.signal_logics)):
+        for fname, signal_logic in self.signalLogicDict.iteritems():
             if self.ui.comboBox.currentText() == "PAS":
-                self.signal_logics[i] = emg.EMGLogic.EMGLogic(emg_signal=self.emg_signals[i], \
+                self.signalLogicDict[fname] = emg.EMGLogic.EMGLogic(emg_signal=self.emgSignalDict[fname], \
                     trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
                     window_begin=self.ui.pas_response_delay_spinbox.value(), \
                     window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
                     paired_pulse=False)
                 self.setPASParameters(True)
             elif self.ui.comboBox.currentText() == "Paired Pulse":
-                self.signal_logics[i] = emg.EMGLogic.EMGLogic(emg_signal=self.emg_signals[i], \
+                self.signalLogicDict[fname] = emg.EMGLogic.EMGLogic(emg_signal=self.emgSignalDict[fname], \
                     trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
                     window_begin=self.ui.pas_response_delay_spinbox.value(), \
                     window_end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
                     paired_pulse=True)
                 self.setPASParameters(True)
             elif self.ui.comboBox.currentText() == "Cortical Silent Period":
-                self.signal_logics[i] = emg.CSPLogic.CSPLogic(emg_signal=self.emg_signals[i], \
+                self.signalLogicDict[fname] = emg.CSPLogic.CSPLogic(emg_signal=self.emgSignalDict[fname], \
                     trigger_threshold=self.ui.csp_trigger_threshold_spinbox.value(), \
                     window_begin=self.ui.csp_response_delay_spinbox.value(), \
                     window_end=self.ui.csp_response_delay_spinbox.value() + self.ui.csp_response_window_spinbox.value(), \
                     csp_threshold=self.ui.csp_csp_threshold_spinbox.value())
                 self.setCSPParameters(True)
             elif self.ui.comboBox.currentText() == "Recruitment Curve":
-                self.signal_logics[i] = emg.RCLogic.RCLogic(emg_signal=self.emg_signals[i], \
+                self.signalLogicDict[fname] = emg.RCLogic.RCLogic(emg_signal=self.emgSignalDict[fname], \
                     trigger_threshold=self.ui.rc_trigger_threshold_spinbox.value(), \
                     window_begin=self.ui.rc_response_delay_spinbox.value(), \
                     window_end=self.ui.rc_response_delay_spinbox.value() + self.ui.rc_response_window_spinbox.value(), \
-                    fid=self.currentFiles[i])
+                    fid=self.currentFileDict[fname])
                 self.setRCParameters(True)
         return
 
-    def createSignalLogic(self, emg_signal):
+    def createSignalLogic(self, filename, emg_signal):
         if self.ui.comboBox.currentText() == "PAS":
             self.signal_logics.append(emg.EMGLogic.EMGLogic(emg_signal=emg_signal, \
                 trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
@@ -275,8 +288,10 @@ class MEPAppController(object):
                 trigger_threshold=self.ui.rc_trigger_threshold_spinbox.value(), \
                 window_begin=self.ui.rc_response_delay_spinbox.value(), \
                 window_end=self.ui.rc_response_delay_spinbox.value() + self.ui.rc_response_window_spinbox.value(), \
-                fid=self.currentFiles[-1]))
-        return
+                fid=self.currentFileDict[filename]))
+        # Quick hack to just return the one we created. Fix this.
+        self.signalLogicDict[filename] = self.signal_logics[-1]
+        return self.signal_logics[-1]
 
 
     def setCSPParameters(self, enabled):
@@ -323,11 +338,11 @@ class MEPAppController(object):
     def rcParametersChanged(self):
         """ Let the signal_logic update its internal dict of triggers and associated parameters.
         """
-        for i in range(len(self.signal_logics)):
-            self.signal_logic.updateParameters(trigger_threshold=self.ui.rc_trigger_threshold_spinbox.value(), \
+        for fname, signal_logic in self.signalLogicDict.iteritems():
+            self.signalLogicDict[fname].updateParameters(trigger_threshold =self.ui.rc_trigger_threshold_spinbox.value(), \
                 begin=self.ui.rc_response_delay_spinbox.value(), \
                 end=self.ui.rc_response_delay_spinbox.value() + self.ui.rc_response_window_spinbox.value(), \
-                filename=self.currentFiles[i])
+                filename=self.currentFileDict[fname])
 
 
     def writeToCSV(self):
@@ -389,13 +404,36 @@ class MEPAppController(object):
             self.ui.graphicsView.removeItem(self.lower_plot)
             self.lower_plot = None
 
-    def addFileLineEdit(self):
-        lineEdit = emg.gui.QtGui.QLineEdit(self.ui.dockWidgetContents)
-        lineEdit.setReadOnly(True)
+    def addFileWidgets(self, fid):
+        fileLineEdit = emg.gui.QtGui.QLineEdit(self.ui.dockWidgetContents)
+        fileLineEdit.setReadOnly(True)
         # Called by add file dialog, so currentFiles is already updated
-        lineEdit.setObjectName("lineEdit{}".format(len(self.currentFiles)))
-        self.ui.gridLayout_2.addWidget(lineEdit, len(self.currentFiles), 1, 1, 1)
-        return lineEdit
+        fileLineEdit.setObjectName("fileLineEdit{}".format(len(self.currentFileDict)))
+        fileLineEdit.setText(fid.name)
+        self.ui.file_mode_layout.addWidget(fileLineEdit, len(self.currentFileDict)+1, 1, 1, 1)
+        fileLabel = emg.gui.QtGui.QLabel(self.ui.dockWidgetContents)
+        fileLabel.setObjectName("fileLabel{}".format(len(self.currentFileDict)))
+        fileLabel.setText("File {}:".format(len(self.currentFileDict)))
+        self.ui.file_mode_layout.addWidget(fileLabel, len(self.currentFileDict)+1, 0, 1, 1)
+        fileCheckbox = emg.gui.QtGui.QCheckBox(self.ui.dockWidgetContents)
+        fileCheckbox.setText("")
+        fileCheckbox.setChecked(True)
+        fileCheckbox.setObjectName("fileCheckbox{}".format(len(self.currentFileDict)))
+        self.ui.file_mode_layout.addWidget(fileCheckbox,len(self.currentFileDict)+1, 2, 1, 1)
+        fileCheckbox.stateChanged.connect(self.updatePlot)
+        widgetTuple = self.FileWidgetTuple(checkbox=fileCheckbox, lineedit=fileLineEdit, label=fileLabel)
+        self.fileWidgetTupleDict[fid.name] = widgetTuple
+        return
+
+    def updatePlot(self):
+        self.emgplot.clear()
+        self.emgplot.legend.items = []
+        for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+            if ftuple.checkbox.isChecked():
+                self.plotDataDict[fname] = self.emgplot.plot(self.signalLogicDict[fname].timesteps, self.signalLogicDict[fname].emg_signal, pen=(255,255,255,200), \
+            name=os.path.basename(str(fname)))
+            else:
+                pass
 
     def startApp(self):
         self.app = emg.gui.QtGui.QApplication(sys.argv)
@@ -432,11 +470,12 @@ class MEPAppController(object):
         self.ui.rc_response_window_spinbox.valueChanged.connect(self.rcParametersChanged)
         self.ui.rc_show_rc_checkbox.stateChanged.connect(self.rcShowRCFitChanged)
         self.ui.command_annotate_button.clicked.connect(self.autoAnnotateSignal)
-        self.ui.add_file_button.clicked.connect(self.addFileLineEdit)
+        self.ui.fileCheckbox1.stateChanged.connect(self.updatePlot)
         self.setCSPParameters(False)
         self.setRCParameters(False)
         self.emgplot = self.ui.graphicsView.addPlot(title="EMG Signal")
         self.emgplot.showGrid(x=True, y=True, alpha=0.6)
+        self.plotLegend = self.emgplot.addLegend()
         self.ui.dockWidget.setMinimumWidth(220)
         self.originalMousePressEvent = self.MainWindow.mousePressEvent
         vb = self.emgplot.getViewBox()
