@@ -56,10 +56,11 @@ class MEPAppController(object):
         self.signal_legend = None
 
         # Keep track of additional files
-        self.FileWidgetTuple = collections.namedtuple('FileWidgetTuple', 'checkbox lineedit label')
+        self.FileWidgetTuple = collections.namedtuple('FileWidgetTuple', 'checkbox lineedit label color')
         self.fileWidgetTupleDict = dict()
         self.plotDataDict = dict()
         self.signalLogicDict = dict()
+        self.colorOrder = [(255,255,255),(255,255,0), (255,0,255), (0, 255, 255)]
 
         # Keep track of additional widgets
         self.savedatadialogWidget = None
@@ -103,7 +104,9 @@ class MEPAppController(object):
                         if self.lower_plot:
                             self.lower_plot.plot(self.signalLogicDict[fname].getTriggerTimePoints(), \
                                 self.signalLogicDict[fname].getTriggerP2Ps(), \
-                                pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+                                #pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+                                #pen=self.colorOrder[len(self.currentFiles)-1], symbolBrush=(255,0,0), symbolPen='w')
+                                pen=self.fileWidgetTupleDict[fname].color, symbolBrush=(255,0,0), symbolPen='w')
         elif self.ui.comboBox.currentText() == "Cortical Silent Period":
             for fname, ftuple in self.fileWidgetTupleDict.iteritems():
                 for trigger_time, csptuple in self.signalLogicDict[fname].trigger_dict.items():
@@ -114,7 +117,7 @@ class MEPAppController(object):
                         if self.lower_plot:
                             self.lower_plot.plot(self.signalLogicDict[fname].getTriggerTimePoints(), \
                                 self.signalLogicDict[fname].getCSPDurations(), \
-                                pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+                                pen=self.fileWidgetTupleDict[fname].color, symbolBrush=(255,0,0), symbolPen='w')
         elif self.ui.comboBox.currentText() == "Recruitment Curve":
             trigger_times = []
             peak2peaks = []
@@ -134,7 +137,7 @@ class MEPAppController(object):
                         self.lower_plot.addItem(err)
                         # plot sigmoid
                         sig_x, sig_y = self.signalLogicDict[fname].getSigmoidFit()
-                        self.lower_plot.plot(sig_x,sig_y)
+                        self.lower_plot.plot(sig_x,sig_y,pen=self.fileWidgetTupleDict[fname].color)
         self.annotated = True
 
     def placeTriggerArrow(self, trigger_time):
@@ -174,18 +177,18 @@ class MEPAppController(object):
         self.emgSignalDict[recentFile.name] = r.GetEMGSignal()
         self.createSignalLogic(filename=recentFile.name, emg_signal=self.emgSignalDict[recentFile.name])
         self.setSignalLogicMode()
-        plotDataItem = self.emgplot.plot(self.signalLogicDict[recentFile.name].timesteps, self.emgSignalDict[recentFile.name], \
-            pen=(255,255,255,200), \
-            name=os.path.basename(str(recentFile.name)))
-        self.plotDataDict[recentFile.name] = plotDataItem
-        
         if len(self.currentFileDict) > 1:
             additionalLineEdit = self.addFileWidgets(fid=recentFile)
             self.additionalLineEdits.append(additionalLineEdit)
         else:
             self.ui.fileLineEdit1.setText(recentFile.name)
-            widgetTuple = self.FileWidgetTuple(checkbox=self.ui.fileCheckbox1, lineedit=self.ui.fileLineEdit1, label=self.ui.fileLabel1)
+            widgetTuple = self.FileWidgetTuple(checkbox=self.ui.fileCheckbox1, lineedit=self.ui.fileLineEdit1, label=self.ui.fileLabel1, color=self.colorOrder[len(self.currentFileDict)-1])
             self.fileWidgetTupleDict[recentFile.name] = widgetTuple
+        plotDataItem = self.emgplot.plot(self.signalLogicDict[recentFile.name].timesteps, self.emgSignalDict[recentFile.name], \
+            #pen=(255,255,255,200), \
+            pen=self.fileWidgetTupleDict[recentFile.name].color, \
+            name=os.path.basename(str(recentFile.name)))
+        self.plotDataDict[recentFile.name] = plotDataItem
         return
 
     def addTrigger(self,ev):
@@ -332,8 +335,8 @@ class MEPAppController(object):
         """ Let the signal_logic update its internal dict of triggers and csp durations
         each time we change a parameters.
         """
-        for i in range(len(self.signal_logics)):
-            self.signal_logics[i].updateParameters(trigger_threshold=self.ui.csp_trigger_threshold_spinbox.value(), \
+        for fname, signal_logic in self.signalLogicDict.iteritems():
+            self.signalLogicDict[fname].updateParameters(trigger_threshold=self.ui.csp_trigger_threshold_spinbox.value(), \
                 begin=self.ui.csp_response_delay_spinbox.value(), \
                 end=self.ui.csp_response_delay_spinbox.value() + self.ui.csp_response_window_spinbox.value(), \
                 csp_threshold=self.ui.csp_csp_threshold_spinbox.value())
@@ -420,7 +423,8 @@ class MEPAppController(object):
         fileCheckbox.setObjectName("fileCheckbox{}".format(len(self.currentFileDict)))
         self.ui.file_mode_layout.addWidget(fileCheckbox,len(self.currentFileDict)+1, 2, 1, 1)
         fileCheckbox.stateChanged.connect(self.updatePlot)
-        widgetTuple = self.FileWidgetTuple(checkbox=fileCheckbox, lineedit=fileLineEdit, label=fileLabel)
+        widgetTuple = self.FileWidgetTuple(checkbox=fileCheckbox, lineedit=fileLineEdit, label=fileLabel, \
+            color=self.colorOrder[len(self.currentFileDict)-1])
         self.fileWidgetTupleDict[fid.name] = widgetTuple
         return
 
@@ -429,7 +433,9 @@ class MEPAppController(object):
         self.emgplot.legend.items = []
         for fname, ftuple in self.fileWidgetTupleDict.iteritems():
             if ftuple.checkbox.isChecked():
-                self.plotDataDict[fname] = self.emgplot.plot(self.signalLogicDict[fname].timesteps, self.signalLogicDict[fname].emg_signal, pen=(255,255,255,200), \
+                self.plotDataDict[fname] = self.emgplot.plot(self.signalLogicDict[fname].timesteps, self.signalLogicDict[fname].emg_signal, \
+                    #pen=(255,255,255,200), \
+                    pen=self.fileWidgetTupleDict[fname].color, \
             name=os.path.basename(str(fname)))
             else:
                 pass
