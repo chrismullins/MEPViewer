@@ -74,57 +74,72 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="0">
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Current File:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Mode: </string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="comboBox">
-         <item>
-          <property name="text">
-           <string>PAS</string>
+     <item row="3" column="0">
+      <widget class="QGroupBox" name="groupBox_3">
+       <property name="title">
+        <string>Recruitment Curve Parameters</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="2" column="1">
+         <widget class="QDoubleSpinBox" name="rc_response_window_spinbox">
+          <property name="singleStep">
+           <double>0.010000000000000</double>
           </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Recruitment Curve</string>
+          <property name="value">
+           <double>0.080000000000000</double>
           </property>
-         </item>
-         <item>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_8">
           <property name="text">
-           <string>Paired Pulse</string>
+           <string>Trigger Threshold:</string>
           </property>
-         </item>
-         <item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_9">
           <property name="text">
-           <string>Cortical Silent Period</string>
+           <string>Response Delay (s):</string>
           </property>
-         </item>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="placeholderText">
-          <string>Load a .smr file.</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="rc_response_delay_spinbox">
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.020000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="rc_trigger_threshold_spinbox">
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Response Window (s):</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QCheckBox" name="rc_show_rc_checkbox">
+          <property name="text">
+           <string>Recruitment Curve vs Intensity Plot</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </item>
      <item row="4" column="0">
       <widget class="QCommandLinkButton" name="command_annotate_button">
@@ -301,72 +316,95 @@
        </layout>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QGroupBox" name="groupBox_3">
-       <property name="title">
-        <string>Recruitment Curve Parameters</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_7">
-        <item row="2" column="1">
-         <widget class="QDoubleSpinBox" name="rc_response_window_spinbox">
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>0.080000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_8">
+     <item row="0" column="0">
+      <layout class="QGridLayout" name="file_mode_layout">
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="fileLineEdit1">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="placeholderText">
+          <string>Load a .smr file.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="comboBox">
+         <item>
           <property name="text">
-           <string>Trigger Threshold:</string>
+           <string>PAS</string>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_9">
+         </item>
+         <item>
           <property name="text">
-           <string>Response Delay (s):</string>
+           <string>Recruitment Curve</string>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="rc_response_delay_spinbox">
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>0.020000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="rc_trigger_threshold_spinbox">
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_10">
+         </item>
+         <item>
           <property name="text">
-           <string>Response Window (s):</string>
+           <string>Paired Pulse</string>
           </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QCheckBox" name="rc_show_rc_checkbox">
+         </item>
+         <item>
           <property name="text">
-           <string>Recruitment Curve vs Intensity Plot</string>
+           <string>Cortical Silent Period</string>
           </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="fileLabel1">
+         <property name="text">
+          <string>File 1:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>Current Files:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Mode: </string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="visibility_label">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="../emgviewerqt/ui_resource.qrc">:/Resources/images/VisibleOn.png</pixmap>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QCheckBox" name="fileCheckbox1">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <property name="indicatorIcon" stdset="0">
+          <iconset resource="../emgviewerqt/ui_resource.qrc">
+           <normaloff>:/Resources/images/VisibleOn.png</normaloff>
+           <normalon>:/Resources/images/VisibleOff.png</normalon>:/Resources/images/VisibleOn.png</iconset>
+         </property>
+         <property name="indicatorIconSize" stdset="0">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -409,6 +447,9 @@
    <header>pyqtgraph</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../emgviewerqt/ui_resource.qrc"/>
+  <include location="../emgviewerqt/ui_resource.qrc"/>
+ </resources>
  <connections/>
 </ui>

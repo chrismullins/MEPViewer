@@ -126,6 +126,14 @@ class RCLogic(object):
         return np.array(intensities), means, stddev
 
     def getSigmoidFit(self):
+        """ Return two vectors specifying x and y for the best sigmoid fit of the 
+        mean MEP readings. The residual is defined as the difference between each data point 
+        and its corresponding point on a sigmoid fitted to the best current guess of parameters.
+        http://www.tau.ac.il/~kineret/amit/scipy_tutorial/
+
+        The sigmoid function is defined as c / (1 + e^(-k(x-x0))) + y0 where c is the max value of the 
+        curve, x0 is the x value of the sigmoid midpoint, and k is the steepness of the curve.
+        """
         import scipy.optimize
         def sigmoid(p,x):
             x0,y0,c,k=p
