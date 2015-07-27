@@ -74,7 +74,22 @@ class MEPAppController(object):
         self.emgSignalDict.clear()
         self.currentFiles = []
         self.currentFileDict.clear()
+        self.fileWidgetTupleDict.clear()
+        self.plotDataDict.clear()
+        self.signalLogicDict.clear()
         self.annotated = False
+
+        self.triggerAnnotationList = []
+        self.minAnnotationList = []
+        self.maxAnnotationList = []
+        self.regionAnnotationList = collections.deque()
+
+        if self.lower_plot:
+            self.ui.graphicsView.removeItem(self.lower_plot)
+
+        self.emgplot.clear()
+        self.emgplot.legend.items = []
+
 
     def autoAnnotateSignal(self):
         """ Detect and annotate the trigger points, min and max points on the plot.
