@@ -1,0 +1,2 @@
+ pyinstaller bin/EMGViewerApp.py --paths=emgviewerqt/:bin/ --hidden-import=scipy.linalg.cython_blas --hidden-import=scipy.linalg.cython
+ _lapack --hidden-import=scipy.special._ufuncs_cxx
