@@ -153,6 +153,7 @@ class MEPAppController(object):
                         # plot sigmoid
                         sig_x, sig_y = self.signalLogicDict[fname].getSigmoidFit()
                         self.lower_plot.plot(sig_x,sig_y,pen=self.fileWidgetTupleDict[fname].color)
+                        self.signalLogicDict[fname].getRCInfo()
         self.annotated = True
 
     def placeTriggerArrow(self, trigger_time):

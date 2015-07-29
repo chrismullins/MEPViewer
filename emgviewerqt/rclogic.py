@@ -50,6 +50,11 @@ class RCLogic(object):
         self.timesteps = self.createTimeStepsArray(emg_signal)
         self.stim_order = self.readIntensityFromHeader(self.filename)
         self.MinMaxTuple = collections.namedtuple('MinMaxTuple', 'minTime minValue maxTime maxValue intensity peak2peak')
+        ## Signal parameters:
+        self.sig_x0 = None
+        self.sig_y0 = None
+        self.sig_c = None
+        self.sig_k = None
         if fid:
             self.updateParameters(window_begin, window_end, trigger_threshold, filename=fid)
 
@@ -149,18 +154,14 @@ class RCLogic(object):
         p, cov, infodict, mesg, ier = scipy.optimize.leastsq(
             residuals,p_guess,args=(x,y),full_output=1)  
         x0,y0,c,k=p
-        print('''\
-        x0 = {x0}
-        y0 = {y0}
-        c = {c}
-        k = {k}
-        '''.format(x0=x0,y0=y0,c=c,k=k))
+        self.sig_x0 = x0
+        self.sig_y0 = y0
+        self.sig_c = c
+        self.sig_k = k
+
 
         xp = np.linspace(np.array(self.stim_order).min(), np.array(self.stim_order).max(), 1500)
         pxp=sigmoid(p,xp)
-        max_slope = np.diff(pxp).max()
-        max_slope /= np.diff(xp)[np.argmax(max_slope)]
-        print("Max slope: {}".format(max_slope))
         return xp, pxp
 
     def writeInfoToCSV(self, outputPath):
@@ -173,9 +174,10 @@ class RCLogic(object):
         for intensity, p2plist in mep_dict.iteritems():
             p2ps = "\n".join(str(p2p) for p2p in p2plist)
             average = str(np.mean(np.array(p2plist)))
-            averge_str = "Average: {}".format(average)
+            average_str = "Average: {}".format(average)
             intro = "Intensity: {}".format(intensity)
             footerList.append("\n".join((intro, p2ps, average_str)))
+        #rcInfo = self.getRCInfo()
 
         np.savetxt(outputPath, \
             np.vstack([
@@ -192,7 +194,82 @@ class RCLogic(object):
             footer="\n".join(footerList), \
             fmt="%.5e")
 
+    def getRCInfo(self):
+        """
+        From http://jn.physiology.org/content/94/4/2844.short:
 
+        At a given stimulation intensity, the four peak-to-peak MEPs were measured 
+        and then averaged together. The averaged MEP response was plotted against 
+        the corresponding stimulation intensity as per Capaday et al. (1999) to produce 
+        a recruitment curve (Fig. 1B). A four-parameter sigmoid function (Boltzman) was 
+        fit to this recruitment curve (see also Knash et al. 2003) that included a 
+        parameter for background EMG activity given that there was a measurable peak-to-peak 
+        EMG response when no MEP was present. Four specific parameters of the recruitment 
+        and sigmoid curves were measured: MEPmax[r], which was the largest MEP evoked in the 
+        facilitated muscle and typically occurred at the largest stimulation intensities; 
+        MEPh, which was measured from the sigmoid curve at the stimulation intensity that 
+        produced a half-maximum response in the before-training condition (Carroll et al. 2001; Knash et al. 2003); 
+        [STOP that sentence makes no sense. Later in the paper, they state: "MEPh was measured as 
+        the mid-point of the minimum and maximum value of the sigmoid curve". Let's go with that.]
+        MEPthresh, which was the stimulation intensity that produces 5% of maximum of the 
+        sigmoid curve (similar to Carroll et al. 2001); and the slope of the steepest region 
+        of the sigmoid curve (measured near MEPh) (Devanne et al. 1997). In addition to 
+        measuring the peak-to-peak values of the MEP, the mean rectified value of EMG over 
+        the period of measurement of the MEP was also calculated. To calculate the average 
+        background EMG activity at each stimulation intensity, the mean amplitude of the 
+        rectified EMG was calculated over a 27-ms window prior to the stimulation with the 
+        mean of all points for a given recruitment curve marked by a horizontal line (see Fig. 1B, bottom).
+        """
+        print("*"*80)
+        print("Info for: {}".format(self.filename))
+        maxMEP = 0
+        maxMEPIntensity = 0
+        intensities = sorted(list(set(self.stim_order)))
+        mep_dict = collections.defaultdict(list)
+        # dict mapping intensities to a list of MEPs at that intensity
+        for ttime, mmtup in self.trigger_dict.iteritems():
+            mep_dict[mmtup.intensity].append(mmtup.peak2peak)
+        for intensity, meplist in mep_dict.iteritems():
+            max_mep = max(meplist)
+            if max_mep > maxMEP:
+                maxMEPIntensity, maxMEP = intensity, max_mep
+        print("Maximum evoked MEP was {} at intensity {}.".format(maxMEP, maxMEPIntensity))
+
+        # midMEP is the midpoint of the minimum and maximum control points of the recruitment
+        # curve.
+        intensity_arr, means_arr, stddev_arr = self.getMeanMEPReadings()
+        MEP_h = np.mean([np.min(means_arr),np.max(means_arr)])
+        # Now we have the midpoint MEP_h, but what intensity would we expect to elicit that response,
+        # according to the sigmoid?
+        sig_mo, sig_y = self.getSigmoidFit()
+        MEP_h_MO = sig_mo[np.argmin(abs(sig_y-MEP_h))]
+        print("Midpoint (MEP_h) was {} at machine output {}".format(MEP_h, MEP_h_MO))
+
+        # Maximum slope is also important
+        d_sig_y = np.diff(sig_y)
+        max_slope = np.max(d_sig_y) / np.diff(sig_mo)[np.argmax(d_sig_y)]
+        max_slope_mo = sig_mo[np.argmax(d_sig_y)]
+        print("Max slope was {} /s at machine output {}".format(max_slope, max_slope_mo))
+
+        # Lastly we need MEP_thresh, the intensity which elicited an MEP of 5% of the maximum
+        # control point.  Since this isn't a MEP, I'm going to call it MO_thresh (machine output threshold)
+        max_sigmoid = np.max(means_arr)
+        MEP_thresh = 0.05*max_sigmoid
+        MO_thresh_index = np.argmin(abs(sig_y-MEP_thresh))
+        #MO_thresh = sig_y[MO_thresh_index]
+        MO_thresh = sig_mo[MO_thresh_index]
+        print("5% of the maximum intensity ({} mV) was reached at machine output {} ".format(MEP_thresh, MO_thresh))
+
+        # Also let's print the equation parameters:
+        print('''\
+        x0 = {x0}
+        y0 = {y0}
+        c = {c}
+        k = {k}
+        '''.format(x0=self.sig_x0,y0=self.sig_y0,c=self.sig_c,k=self.sig_k))
+
+
+        
 
     def getTriggerTimePoints(self):
         return np.array(sorted(self.trigger_dict))
