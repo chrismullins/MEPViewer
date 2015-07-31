@@ -9,9 +9,10 @@ class EMGLogic(object):
         dt = float(signal.sampling_period)
         return np.linspace(0.0, float(dt*signal.size - dt), num=signal.size)
 
-    def __init__(self, emg_signal, trigger_threshold=1.0, window_begin=0.02, window_end=0.10, \
+    def __init__(self, emg_signal, fid=None, trigger_threshold=1.0, window_begin=0.02, window_end=0.10, \
      paired_pulse=True, pp_interval=0.03):
         self.emg_signal = emg_signal
+        self.filename = fid.name
         self.emg_signal_deriv = np.diff(self.emg_signal)
         self.trigger_threshold = trigger_threshold
         self.paired_pulse = paired_pulse
@@ -101,6 +102,16 @@ class EMGLogic(object):
                 np.array([0,0,0,0,0,0,self.getFinalAverage()])]), \
             header="trigger,min_time,min_value,max_time,max_value,mean,peak2peak,finalAverage", delimiter=",", \
             fmt="%.5e")
+
+    def getSignalInfo(self):
+        infoStrings = []
+        infoStrings.append("*"*80)
+        infoStrings.append("Info for: {}".format(self.filename))
+        infoStrings.append("[trigger time, MEP Amplitude]")
+        infoStrings.append("=============================")
+        infoStrings.append(str(np.hstack(arr.reshape(-1,1) for arr in [self.getTriggerTimePoints(), self.getTriggerP2Ps()])))
+        infoStrings.append("Average MEP Amplitude: {}".format(self.getFinalAverage()))
+        return "\n".join(infoStrings)
 
     def getTriggerTimePoints(self):
         return np.array(sorted(self.trigger_dict))

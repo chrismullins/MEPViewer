@@ -141,6 +141,96 @@
        </layout>
       </widget>
      </item>
+     <item row="0" column="0">
+      <layout class="QGridLayout" name="file_mode_layout">
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="fileLineEdit1">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="placeholderText">
+          <string>Load a .smr file.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="comboBox">
+         <item>
+          <property name="text">
+           <string>PAS</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Recruitment Curve</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Paired Pulse</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Cortical Silent Period</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="fileLabel1">
+         <property name="text">
+          <string>File 1:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>Current Files:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Mode: </string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="visibility_label">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="../emgviewerqt/ui_resource.qrc">:/Resources/images/VisibleOn.png</pixmap>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QCheckBox" name="fileCheckbox1">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <property name="indicatorIcon" stdset="0">
+          <iconset resource="../emgviewerqt/ui_resource.qrc">
+           <normaloff>:/Resources/images/VisibleOn.png</normaloff>
+           <normalon>:/Resources/images/VisibleOff.png</normalon>:/Resources/images/VisibleOn.png</iconset>
+         </property>
+         <property name="indicatorIconSize" stdset="0">
+          <size>
+           <width>21</width>
+           <height>21</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
      <item row="4" column="0">
       <widget class="QCommandLinkButton" name="command_annotate_button">
        <property name="text">
@@ -316,95 +406,23 @@
        </layout>
       </widget>
      </item>
-     <item row="0" column="0">
-      <layout class="QGridLayout" name="file_mode_layout">
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="fileLineEdit1">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="placeholderText">
-          <string>Load a .smr file.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="comboBox">
-         <item>
-          <property name="text">
-           <string>PAS</string>
-          </property>
+     <item row="6" column="0">
+      <widget class="QDockWidget" name="dockWidget_2">
+       <property name="windowTitle">
+        <string>Log Console</string>
+       </property>
+       <widget class="QWidget" name="dockWidgetContents_2">
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QPlainTextEdit" name="plainTextEdit">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
-         <item>
-          <property name="text">
-           <string>Recruitment Curve</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Paired Pulse</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Cortical Silent Period</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="fileLabel1">
-         <property name="text">
-          <string>File 1:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_15">
-         <property name="text">
-          <string>Current Files:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_11">
-         <property name="text">
-          <string>Mode: </string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLabel" name="visibility_label">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap resource="../emgviewerqt/ui_resource.qrc">:/Resources/images/VisibleOn.png</pixmap>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QCheckBox" name="fileCheckbox1">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-         <property name="indicatorIcon" stdset="0">
-          <iconset resource="../emgviewerqt/ui_resource.qrc">
-           <normaloff>:/Resources/images/VisibleOn.png</normaloff>
-           <normalon>:/Resources/images/VisibleOff.png</normalon>:/Resources/images/VisibleOn.png</iconset>
-         </property>
-         <property name="indicatorIconSize" stdset="0">
-          <size>
-           <width>21</width>
-           <height>21</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-      </layout>
+        </layout>
+       </widget>
+      </widget>
      </item>
     </layout>
    </widget>

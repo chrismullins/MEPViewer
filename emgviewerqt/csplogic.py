@@ -8,8 +8,9 @@ class CSPLogic(object):
             dt = float(signal.sampling_period)
             return np.linspace(0.0, float(dt*signal.size - dt), num=signal.size)
 
-    def __init__(self, emg_signal, trigger_threshold=1.0, window_begin=0.02, window_end=1.02, csp_threshold=0.1):
+    def __init__(self, emg_signal, fid=None, trigger_threshold=1.0, window_begin=0.02, window_end=1.02, csp_threshold=0.1):
         self.emg_signal = emg_signal
+        self.filename = fid.name
         self.timesteps = self.createTimeStepsArray(emg_signal)
         self.emg_signal_deriv = np.diff(emg_signal)
         self.CSPTuple = collections.namedtuple('CSPTuple', 'cspStartTime cspStartValue cspEndTime cspEndValue windowBeginTime windowEndTime')
@@ -92,6 +93,17 @@ class CSPLogic(object):
                 np.array([0,0,0,self.getAverageCSPDuration()])]), \
             header="trigger,csp_start,csp_end,csp_duration,average_csp_duration", delimiter=",", \
             fmt="%.5e")
+
+    def getSignalInfo(self):
+        infoStrings = []
+        infoStrings.append("*"*80)
+        infoStrings.append("Info for: {}".format(self.filename))
+        infoStrings.append("[trigger time, CSP Length (begin to end)]")
+        infoStrings.append("=========================================")
+        infoStrings.append(str(np.hstack(arr.reshape(-1,1) for arr in [self.getTriggerTimePoints(), self.getCSPDurations()])))
+        infoStrings.append("Average CSP Duration: {}".format(self.getAverageCSPDuration()))
+        return "\n".join(infoStrings)
+
 
     def getTriggerTimePoints(self):
         return np.array(sorted(self.trigger_dict))
