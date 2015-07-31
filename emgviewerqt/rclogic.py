@@ -159,7 +159,6 @@ class RCLogic(object):
         self.sig_c = c
         self.sig_k = k
 
-
         xp = np.linspace(np.array(self.stim_order).min(), np.array(self.stim_order).max(), 1500)
         pxp=sigmoid(p,xp)
         return xp, pxp
@@ -194,7 +193,7 @@ class RCLogic(object):
             footer="\n".join(footerList), \
             fmt="%.5e")
 
-    def getRCInfo(self):
+    def getSignalInfo(self):
         """
         From http://jn.physiology.org/content/94/4/2844.short:
 
@@ -220,8 +219,9 @@ class RCLogic(object):
         rectified EMG was calculated over a 27-ms window prior to the stimulation with the 
         mean of all points for a given recruitment curve marked by a horizontal line (see Fig. 1B, bottom).
         """
-        print("*"*80)
-        print("Info for: {}".format(self.filename))
+        infoStrings = []
+        infoStrings.append("*"*80)
+        infoStrings.append("Info for: {}".format(self.filename))
         maxMEP = 0
         maxMEPIntensity = 0
         intensities = sorted(list(set(self.stim_order)))
@@ -233,7 +233,7 @@ class RCLogic(object):
             max_mep = max(meplist)
             if max_mep > maxMEP:
                 maxMEPIntensity, maxMEP = intensity, max_mep
-        print("Maximum evoked MEP was {} at intensity {}.".format(maxMEP, maxMEPIntensity))
+        infoStrings.append("Maximum evoked MEP was {} at intensity {}.".format(maxMEP, maxMEPIntensity))
 
         # midMEP is the midpoint of the minimum and maximum control points of the recruitment
         # curve.
@@ -243,30 +243,29 @@ class RCLogic(object):
         # according to the sigmoid?
         sig_mo, sig_y = self.getSigmoidFit()
         MEP_h_MO = sig_mo[np.argmin(abs(sig_y-MEP_h))]
-        print("Midpoint (MEP_h) was {} at machine output {}".format(MEP_h, MEP_h_MO))
+        infoStrings.append("Midpoint (MEP_h) was {} at machine output {}".format(MEP_h, MEP_h_MO))
 
         # Maximum slope is also important
         d_sig_y = np.diff(sig_y)
         max_slope = np.max(d_sig_y) / np.diff(sig_mo)[np.argmax(d_sig_y)]
         max_slope_mo = sig_mo[np.argmax(d_sig_y)]
-        print("Max slope was {} /s at machine output {}".format(max_slope, max_slope_mo))
+        infoStrings.append("Max slope was {} /s at machine output {}".format(max_slope, max_slope_mo))
 
         # Lastly we need MEP_thresh, the intensity which elicited an MEP of 5% of the maximum
         # control point.  Since this isn't a MEP, I'm going to call it MO_thresh (machine output threshold)
         max_sigmoid = np.max(means_arr)
         MEP_thresh = 0.05*max_sigmoid
         MO_thresh_index = np.argmin(abs(sig_y-MEP_thresh))
-        #MO_thresh = sig_y[MO_thresh_index]
         MO_thresh = sig_mo[MO_thresh_index]
-        print("5% of the maximum intensity ({} mV) was reached at machine output {} ".format(MEP_thresh, MO_thresh))
+        infoStrings.append("5% of the maximum intensity ({} mV) was reached at machine output {} ".format(MEP_thresh, MO_thresh))
 
-        # Also let's print the equation parameters:
-        print('''\
-        x0 = {x0}
-        y0 = {y0}
-        c = {c}
-        k = {k}
-        '''.format(x0=self.sig_x0,y0=self.sig_y0,c=self.sig_c,k=self.sig_k))
+        infoStrings.append('''\
+            x0 = {x0}
+            y0 = {y0}
+            c = {c}
+            k = {k}
+            '''.format(x0=self.sig_x0,y0=self.sig_y0,c=self.sig_c,k=self.sig_k))
+        return "\n".join(infoStrings)
 
 
         
