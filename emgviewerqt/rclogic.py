@@ -58,11 +58,11 @@ class RCLogic(object):
         if fid:
             self.updateParameters(window_begin, window_end, trigger_threshold, filename=fid)
 
-    def updateParameters(self, begin, end, threshold, filename):
+    def updateParameters(self, begin, end, trigger_threshold, filename):
         self.trigger_dict = dict()
         self.window_begin = begin
         self.window_end = end
-        self.trigger_threshold = threshold
+        self.trigger_threshold = trigger_threshold
         self.fid = filename
         self.response_window_time = np.array([self.window_begin,self.window_end])
         self.response_window_indices = self.response_window_time*self.emg_signal.sampling_rate

@@ -327,10 +327,10 @@ class MEPAppController(object):
         each time we change a parameter.  This is fast so it doesn't really matter.
         Alternatively, we could put this step off until asked to plot it.
         """
-        for i in range(len(self.signal_logics)):
-            self.signal_logics[i].updateParameters(threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
-                   begin=self.ui.pas_response_delay_spinbox.value(), \
-                    end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value())
+        for fname, signal_logic in self.signalLogicDict.iteritems():
+            self.signalLogicDict[fname].updateParameters(trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
+                begin=self.ui.pas_response_delay_spinbox.value(), \
+                end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value())
 
     def cspParametersChanged(self):
         """ Let the signal_logic update its internal dict of triggers and csp durations
