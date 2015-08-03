@@ -21,11 +21,11 @@ class EMGLogic(object):
         self.MinMaxTuple = collections.namedtuple('MinMaxTuple', 'minTime minValue maxTime maxValue peak2peak')
         self.updateParameters(window_begin, window_end, trigger_threshold)
 
-    def updateParameters(self, begin, end, threshold):
+    def updateParameters(self, begin, end, trigger_threshold):
         self.trigger_dict = dict()
         self.window_begin = begin
         self.window_end = end
-        self.trigger_threshold = threshold
+        self.trigger_threshold = trigger_threshold
         self.response_window_time = np.array([self.window_begin,self.window_end])
         self.response_window_indices = self.response_window_time*self.emg_signal.sampling_rate
         self.fillTriggerDict()
