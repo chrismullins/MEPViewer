@@ -55,6 +55,9 @@ class MEPAppController(object):
         self.lower_plot = None
         self.signal_legend = None
 
+        #self.lr = None
+        self.lr = pg.LinearRegionItem([0, 10])
+
         # Keep track of additional files
         self.FileWidgetTuple = collections.namedtuple('FileWidgetTuple', 'checkbox lineedit label color')
         self.fileWidgetTupleDict = dict()
@@ -444,6 +447,41 @@ class MEPAppController(object):
         if message:
             self.ui.plainTextEdit.appendPlainText(message)
 
+    def doHistogramDemo(self):
+        self.ui.graphicsView.nextRow()
+        self.lower_plot = self.ui.graphicsView.addPlot(title="MEP Histogram")
+        self.lower_plot.setLabel('left', "MEP Amplitude", units='mV')
+        self.lower_plot.setLabel('bottom', "Time", units='s')
+        
+        self.regionAnnotationList.append(self.lr)
+        self.emgplot.addItem(self.lr)
+        y,x = None, None
+        for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+            if ftuple.checkbox.isChecked():
+                tmin,tmax = self.lr.getRegion()
+                tsteps = self.signalLogicDict[fname].timesteps
+                idx = (tsteps>tmin)*(tsteps<tmax)
+                region = self.signalLogicDict[fname].emg_signal[np.where(idx)]
+                y,x = np.histogram(region, bins=100, range=(-0.1, 0.1))
+        y = np.lib.pad(y, (0,x.size-y.size), 'constant', constant_values=(0,0))
+        self.lower_plot.plot(x,y, fillLevel=-0.3, brush=(50,50,200,100))
+        self.lr.sigRegionChangeFinished.connect(self.updateHisto)
+
+    def updateHisto(self):
+        self.lower_plot.clear()
+        y,x = None, None
+        for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+            if ftuple.checkbox.isChecked():
+                tmin,tmax = self.lr.getRegion()
+                tsteps = self.signalLogicDict[fname].timesteps
+                idx = (tsteps>tmin)*(tsteps<tmax)
+                region = self.signalLogicDict[fname].emg_signal[np.where(idx)]
+                y,x = np.histogram(region, bins=100, range=(-0.1, 0.1))
+        y = np.lib.pad(y, (0,x.size-y.size), 'constant', constant_values=(0,0))
+        self.lower_plot.plot(x,y, fillLevel=-0.3, brush=(50,50,200,100))
+
+
+
     def startApp(self):
         self.app = emg.gui.QtGui.QApplication(sys.argv)
         self.MainWindow = emg.gui.QtGui.QMainWindow()
@@ -480,6 +518,7 @@ class MEPAppController(object):
         self.ui.rc_show_rc_checkbox.stateChanged.connect(self.rcShowRCFitChanged)
         self.ui.command_annotate_button.clicked.connect(self.autoAnnotateSignal)
         self.ui.fileCheckbox1.stateChanged.connect(self.updatePlot)
+        self.ui.histogramButton.clicked.connect(self.doHistogramDemo)
         self.setCSPParameters(False)
         self.setRCParameters(False)
         self.emgplot = self.ui.graphicsView.addPlot(title="EMG Signal")

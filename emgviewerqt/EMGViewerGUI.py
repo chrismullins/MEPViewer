@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\P\MEPApp\Qt\ECGViewerQt\Resources\EMGViewerGUI.ui'
 #
-# Created: Fri Jul 31 09:18:13 2015
+# Created: Sun Aug 09 19:02:34 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -131,7 +131,7 @@ class Ui_MainWindow(object):
         self.command_annotate_button.setObjectName(_fromUtf8("command_annotate_button"))
         self.gridLayout_3.addWidget(self.command_annotate_button, 4, 0, 1, 1)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.gridLayout_3.addItem(spacerItem, 5, 0, 1, 1)
+        self.gridLayout_3.addItem(spacerItem, 6, 0, 1, 1)
         self.groupBox = QtGui.QGroupBox(self.dockWidgetContents)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.gridLayout_6 = QtGui.QGridLayout(self.groupBox)
@@ -217,7 +217,10 @@ class Ui_MainWindow(object):
         self.plainTextEdit.setObjectName(_fromUtf8("plainTextEdit"))
         self.gridLayout_2.addWidget(self.plainTextEdit, 0, 0, 1, 1)
         self.dockWidget_2.setWidget(self.dockWidgetContents_2)
-        self.gridLayout_3.addWidget(self.dockWidget_2, 6, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.dockWidget_2, 7, 0, 1, 1)
+        self.histogramButton = QtGui.QCommandLinkButton(self.dockWidgetContents)
+        self.histogramButton.setObjectName(_fromUtf8("histogramButton"))
+        self.gridLayout_3.addWidget(self.histogramButton, 5, 0, 1, 1)
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget)
         self.actionLoad = QtGui.QAction(MainWindow)
@@ -280,6 +283,7 @@ class Ui_MainWindow(object):
         self.label_12.setText(_translate("MainWindow", "Trigger Threshold:", None))
         self.csp_show_csp_window_checkbox.setText(_translate("MainWindow", "Show CSP Window", None))
         self.dockWidget_2.setWindowTitle(_translate("MainWindow", "Log Console", None))
+        self.histogramButton.setText(_translate("MainWindow", "HISTOGRAM", None))
         self.actionLoad.setText(_translate("MainWindow", "Load", None))
         self.actionCSV.setText(_translate("MainWindow", "CSV", None))
         self.actionExit.setText(_translate("MainWindow", "Exit", None))
