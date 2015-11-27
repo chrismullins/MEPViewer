@@ -1,4 +1,6 @@
-## MEPViewer
+## MAVIN
+Mep Analysis and Visualization INstrument
+
 A pyqtgraph application for viewing and interpreting EMG data
 
 ### System Prerequisites
