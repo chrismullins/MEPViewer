@@ -13,7 +13,8 @@ class EMGLogic(object):
      paired_pulse=True, pp_interval=0.03):
         self.emg_signal = emg_signal
         self.filename = fid.name
-        self.emg_signal_deriv = np.diff(self.emg_signal)
+        # Use np.array() to avoid the "<ufunc 'less'> not supported by quantities" error
+        self.emg_signal_deriv = np.array(np.diff(self.emg_signal))
         self.trigger_threshold = trigger_threshold
         self.paired_pulse = paired_pulse
         self.pp_interval = pp_interval
