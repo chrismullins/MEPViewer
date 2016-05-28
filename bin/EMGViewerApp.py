@@ -65,6 +65,9 @@ class MEPAppController(object):
         # Keep track of additional widgets
         self.savedatadialogWidget = None
 
+        #Keep track of whether or not we're adding triggers manually
+        self.adding_triggers_manually = False
+
         self.startApp()
 
     def clearScene(self):
@@ -208,27 +211,69 @@ class MEPAppController(object):
         return
 
     def addTrigger(self,ev):
+        #print("IN ADDTRIGGER")
+        self.adding_triggers_manually = True
         self.vLine = pg.InfiniteLine(angle=90, movable=False)
         self.hLine = pg.InfiniteLine(angle=0, movable=False)
         self.emgplot.addItem(self.vLine, ignoreBounds=True)
         self.emgplot.addItem(self.hLine, ignoreBounds=True)
-        self.MainWindow.mousePressEvent = self.plotClicked
+        #self.MainWindow.mousePressEvent = self.plotClicked
+        #self.MainWindow.mousePressEvent.connect(self.plotClicked) # no
+        self.emgplot.scene().sigMouseClicked.connect(self.plotClicked)
         self.emgplot.scene().sigMouseMoved.connect(self.mouseMovedAddTrigger)
 
-    def plotClicked(self,ev):
-        view = self.emgplot.getViewBox()
-        self.emgplot.removeItem(self.vLine)
-        self.emgplot.removeItem(self.hLine)
-        trigger_time = self.signal_logic.addTriggerTimepoint( \
-            float(view.mapSceneToView(ev.pos()).x()))
-        minmaxtuple = self.signal_logic.trigger_dict[trigger_time]
-        self.annotateTriggerPoint(trigger_time)
-        self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
-        self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
+    def plotClicked(self,evt):
+        pos = evt
+        if self.adding_triggers_manually:
+            self.emgplot.removeItem(self.vLine)
+            self.emgplot.removeItem(self.hLine)
+            mousePoint = QtCore.QPointF(pos.scenePos())
+            viewPoint = self.view.mapSceneToView(mousePoint)
+            trigger_time = viewPoint.x()
+            peak2peaks = []
+            for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+                signal_logic = self.signalLogicDict[fname]
+                trigger_tuple = signal_logic.addTriggerTimepoint(trigger_time)
+                self.placeTriggerArrow(trigger_time)
+                self.placeUpArrow(trigger_tuple.minTime, trigger_tuple.minValue)
+                self.placeDownArrow(trigger_tuple.maxTime, trigger_tuple.maxValue)
+                #self.logIt(self.signalLogicDict[fname].getSignalInfo())
+                self.logIt(signal_logic.getSignalInfo())
 
-        self.MainWindow.mousePressEvent = self.originalMousePressEvent
-        self.emgplot.scene().sigMouseMoved.disconnect()
-        return
+            self.adding_triggers_manually = False
+            return
+        else:
+            return
+
+
+        # trigger_times = []
+        #     peak2peaks = []
+        #     for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+        #         for trigger_time, minmaxtuple in self.signalLogicDict[fname].trigger_dict.items():
+        #             if ftuple.checkbox.isChecked():
+        #                 self.placeTriggerArrow(trigger_time)
+        #                 self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
+        #                 trigger_times.append(trigger_time)
+        #                 peak2peaks.append(minmaxtuple.peak2peak)
+        #                 self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
+        #                 if self.lower_plot:
+        #                     self.lower_plot.plot(self.signalLogicDict[fname].getTriggerTimePoints(), \
+        #                         self.signalLogicDict[fname].getTriggerP2Ps(), \
+        #                         #pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
+        #                         #pen=self.colorOrder[len(self.currentFiles)-1], symbolBrush=(255,0,0), symbolPen='w')
+        #                         pen=self.fileWidgetTupleDict[fname].color, symbolBrush=(255,0,0), symbolPen='w')
+
+
+        #trigger_time = self.signal_logic.addTriggerTimepoint( \
+        #    float(view.mapSceneToView(ev.pos()).x()))
+        #minmaxtuple = self.signal_logic.trigger_dict[trigger_time]
+        # self.annotateTriggerPoint(trigger_time)
+        # self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
+        # self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
+
+        # self.MainWindow.mousePressEvent = self.originalMousePressEvent
+        # self.emgplot.scene().sigMouseMoved.disconnect()
+        # return
 
     def mouseMovedAddTrigger(self, evt):
         #pos = evt[0]  ## using signal proxy turns original arguments into a tuple

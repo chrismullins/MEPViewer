@@ -84,9 +84,11 @@ class EMGLogic(object):
 
     def addTriggerTimepoint(self, trigger_time):
         new_trigger_index = np.argmin(abs(self.timesteps - trigger_time))
-        self.trigger_dict[self.timesteps[new_trigger_index]] = \
-            self.findResponseMinMaxs(new_trigger_index)
-        return self.timesteps[new_trigger_index]
+        trigger_tuple = self.findResponseMinMaxs(new_trigger_index)
+        self.trigger_dict[self.timesteps[new_trigger_index]] = trigger_tuple
+        #return self.timesteps[new_trigger_index]
+        return trigger_tuple
+
 
     def writeInfoToCSV(self, outputPath):
         np.savetxt(outputPath, \
