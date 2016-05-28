@@ -112,6 +112,7 @@ class MEPAppController(object):
             trigger_times = []
             peak2peaks = []
             for fname, ftuple in self.fileWidgetTupleDict.iteritems():
+                self.signalLogicDict[fname].fillTriggerDict()
                 for trigger_time, minmaxtuple in self.signalLogicDict[fname].trigger_dict.items():
                     if ftuple.checkbox.isChecked():
                         self.placeTriggerArrow(trigger_time)
@@ -217,8 +218,6 @@ class MEPAppController(object):
         self.hLine = pg.InfiniteLine(angle=0, movable=False)
         self.emgplot.addItem(self.vLine, ignoreBounds=True)
         self.emgplot.addItem(self.hLine, ignoreBounds=True)
-        #self.MainWindow.mousePressEvent = self.plotClicked
-        #self.MainWindow.mousePressEvent.connect(self.plotClicked) # no
         self.emgplot.scene().sigMouseClicked.connect(self.plotClicked)
         self.emgplot.scene().sigMouseMoved.connect(self.mouseMovedAddTrigger)
 
@@ -244,36 +243,6 @@ class MEPAppController(object):
             return
         else:
             return
-
-
-        # trigger_times = []
-        #     peak2peaks = []
-        #     for fname, ftuple in self.fileWidgetTupleDict.iteritems():
-        #         for trigger_time, minmaxtuple in self.signalLogicDict[fname].trigger_dict.items():
-        #             if ftuple.checkbox.isChecked():
-        #                 self.placeTriggerArrow(trigger_time)
-        #                 self.placeUpArrow(minmaxtuple.minTime, minmaxtuple.minValue)
-        #                 trigger_times.append(trigger_time)
-        #                 peak2peaks.append(minmaxtuple.peak2peak)
-        #                 self.placeDownArrow(minmaxtuple.maxTime, minmaxtuple.maxValue)
-        #                 if self.lower_plot:
-        #                     self.lower_plot.plot(self.signalLogicDict[fname].getTriggerTimePoints(), \
-        #                         self.signalLogicDict[fname].getTriggerP2Ps(), \
-        #                         #pen=(200,200,200), symbolBrush=(255,0,0), symbolPen='w')
-        #                         #pen=self.colorOrder[len(self.currentFiles)-1], symbolBrush=(255,0,0), symbolPen='w')
-        #                         pen=self.fileWidgetTupleDict[fname].color, symbolBrush=(255,0,0), symbolPen='w')
-
-
-        #trigger_time = self.signal_logic.addTriggerTimepoint( \
-        #    float(view.mapSceneToView(ev.pos()).x()))
-        #minmaxtuple = self.signal_logic.trigger_dict[trigger_time]
-        # self.annotateTriggerPoint(trigger_time)
-        # self.annotateMinPoint(minmaxtuple.minTime, minmaxtuple.minValue)
-        # self.annotateMaxPoint(minmaxtuple.maxTime, minmaxtuple.maxValue)
-
-        # self.MainWindow.mousePressEvent = self.originalMousePressEvent
-        # self.emgplot.scene().sigMouseMoved.disconnect()
-        # return
 
     def mouseMovedAddTrigger(self, evt):
         #pos = evt[0]  ## using signal proxy turns original arguments into a tuple
@@ -375,7 +344,8 @@ class MEPAppController(object):
         for fname, signal_logic in self.signalLogicDict.iteritems():
             self.signalLogicDict[fname].updateParameters(trigger_threshold=self.ui.pas_trigger_threshold_spinbox.value(), \
                 begin=self.ui.pas_response_delay_spinbox.value(), \
-                end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value())
+                end=self.ui.pas_response_delay_spinbox.value() + self.ui.pas_response_window_spinbox.value(), \
+                fill_trigger_dict=True)
 
     def cspParametersChanged(self):
         """ Let the signal_logic update its internal dict of triggers and csp durations
